@@ -1,14 +1,5 @@
-/**
- * HTTP adapter with authentication handling.
- * 
- * Implements axios interceptors for:
- * - Automatically attaching access token to requests (from memory)
- * - Auto-refreshing expired tokens via httpOnly cookie
- * - Queuing requests during refresh to avoid token race conditions
- */
-
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { getErrorMessage } from '@/content/errors';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api';
 
@@ -36,7 +27,6 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-/** Attaches access token if available */
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -44,11 +34,6 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-/**
- * Response interceptor handles 401 errors by attempting token refresh.
- * If refresh succeeds, retries the original request with the new token.
- * Queues concurrent requests during refresh to avoid race conditions.
- */
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -83,7 +68,6 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         setAccessToken(null);
-        // Don't redirect infinitely if already on login page
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
@@ -93,7 +77,6 @@ api.interceptors.response.use(
       }
     }
 
-    // Transform error to include human-readable message
     const responseData = error.response?.data as { error?: { code?: string; message?: string } } | undefined;
     const errorCode = responseData?.error?.code ?? 'INTERNAL_ERROR';
     const errorMessage = getErrorMessage(errorCode);

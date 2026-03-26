@@ -1,31 +1,24 @@
-/**
- * Management Page — Centralized dashboard for Admins and Presidents.
- * Role-based cards for creating Teams, Players, Referees, and Tournaments.
- */
-
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import { CreateTeamForm } from '@/components/features/management/CreateTeamForm';
+import { CreateTournamentForm } from '@/components/features/management/CreateTournamentForm';
+import { CreateUserForm } from '@/components/features/management/CreateUserForm';
+import { EntityManager } from '@/components/features/management/EntityManager';
+import { Modal } from '@/components/ui/Modal';
 import { useAlert } from '@/context/AlertContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import {
-    Shield,
-    UserPlus,
-    Trophy,
-    Plus,
     ChevronLeft,
-    MapPin
+    Filter, Layers, List,
+    MapPin,
+    Plus,
+    Shield,
+    Trophy,
+    UserPlus
 } from 'lucide-react';
-import { useState } from 'react';
-import { Modal } from '@/components/ui/Modal';
-import { CreateTeamForm } from '@/components/features/management/CreateTeamForm';
-import { CreateUserForm } from '@/components/features/management/CreateUserForm';
-import { CreateTournamentForm } from '@/components/features/management/CreateTournamentForm';
-import { CreateGroupForm } from '@/components/features/management/CreateGroupForm';
-import { Filter, Layers, List } from 'lucide-react';
-import { EntityManager } from '@/components/features/management/EntityManager';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function ManagementPage() {
     const { user, isLoading } = useAuth();

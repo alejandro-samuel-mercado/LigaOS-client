@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Trophy, ChevronRight, Trash2, Search, Calendar } from 'lucide-react';
 import { api } from '@/adapters/http';
-import { LABELS } from '@/content/labels';
-import { useAuth } from '@/context/AuthContext';
 import { TournamentDashboard } from '@/components/features/tournaments/TournamentDashboard';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useAuth } from '@/context/AuthContext';
+import { useLocation } from '@/context/LocationContext';
 import { usePersistentData } from '@/hooks/usePersistentData';
+import { motion } from 'framer-motion';
+import { Calendar, ChevronRight, Trash2, Trophy } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
 interface TournamentPreview {
     id: string;
@@ -38,12 +38,17 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default function TournamentsPage() {
+    const { location, isLoaded } = useLocation();
+    
     const { data: tournamentsRaw, loading, refresh: fetchTournaments } = usePersistentData<TournamentPreview[]>(
-        'tournaments_list',
+        `tournaments_list_${location.state || 'all'}`,
         async () => {
-            const { data } = await api.get('/tournaments');
+            if (!isLoaded) return [];
+            const stateQuery = location.state ? `?state=${encodeURIComponent(location.state)}` : '';
+            const { data } = await api.get(`/tournaments${stateQuery}`);
             return data.data.sort((a: any, b: any) => new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime());
-        }
+        },
+        [location.state, isLoaded]
     );
     const tournaments = tournamentsRaw || [];
 

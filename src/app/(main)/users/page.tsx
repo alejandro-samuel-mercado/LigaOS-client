@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Users, Plus, Search } from 'lucide-react';
 import { api } from '@/adapters/http';
-import { LABELS } from '@/content/labels';
 import { ROLE_LABELS } from '@/content/roles';
-import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
+import { useAuth } from '@/context/AuthContext';
+import { useLocation } from '@/context/LocationContext';
+import { motion } from 'framer-motion';
+import { Plus, Search } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface UserPreview {
   id: string;
@@ -27,6 +27,7 @@ export default function UsersPage() {
   const { user, isLoading: authLoading } = useAuth();
   const { info } = useAlert();
   const router = useRouter();
+  const { location, isLoaded } = useLocation();
 
   const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
 
@@ -37,11 +38,13 @@ export default function UsersPage() {
   }, [isAdmin, authLoading, router]);
 
   useEffect(() => {
+    if (!isLoaded) return;
     async function fetchUsers() {
       if (!isAdmin) return;
       setLoading(true);
       try {
-        const { data } = await api.get(`/search?query=${search}&type=users`);
+        const stateParam = location.state ? `&state=${encodeURIComponent(location.state)}` : '';
+        const { data } = await api.get(`/search?query=${search}&type=users${stateParam}`);
         setUsers(data.data.users || []);
       } finally {
         setLoading(false);
@@ -49,7 +52,7 @@ export default function UsersPage() {
     }
     const timer = setTimeout(fetchUsers, 300);
     return () => clearTimeout(timer);
-  }, [search, isAdmin]);
+  }, [search, isAdmin, location.state, isLoaded]);
 
   if (authLoading || !isAdmin) return null;
 

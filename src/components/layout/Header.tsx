@@ -1,18 +1,12 @@
-/**
- * Dynamic header component.
- * Adapts title, background, and actions based on the current section.
- * Supports gradient backgrounds that change per section.
- */
-
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
 import { HEADER_TITLES } from '@/content/navigation';
-import { Bell, Settings, Search } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bell, Search } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function Header() {
   const pathname = usePathname();
@@ -23,7 +17,7 @@ export function Header() {
 
   const handleSearch = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
-      router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/social?query=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
       setSearchQuery('');
     }

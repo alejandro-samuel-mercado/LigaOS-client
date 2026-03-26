@@ -1,22 +1,23 @@
 {
-  "name": "Liga - Fútbol de Barrio",
-  "short_name": "Liga",
-  "description": "Gestión de ligas de fútbol de barrio",
+  "name": "LigaOS",
+  "short_name": "LigaOS",
+  "description": "Sistema Operativo para Ligas de Fútbol amateur y profesional.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#050a15",
-  "theme_color": "#050a15",
+  "background_color": "#000000",
+  "theme_color": "#ccff00",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

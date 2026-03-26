@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { api } from '@/adapters/http';
-import { CalendarDays, Clock, MapPin, Search, ChevronLeft, Shield, Trophy } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
+import { useLocation } from '@/context/LocationContext';
 import { usePersistentData } from '@/hooks/usePersistentData';
+import { CalendarDays, ChevronLeft, MapPin, Search, Shield, Trophy } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface Match {
     id: string;
@@ -30,21 +30,28 @@ export default function MatchesPage() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<'upcoming' | 'recent'>('upcoming');
     const [searchQuery, setSearchQuery] = useState('');
+    const { location, isLoaded } = useLocation();
 
     const { data: upcoming, loading: loadingUp } = usePersistentData<Match[]>(
-        'all_upcoming_matches_v3',
+        `all_upcoming_matches_v3_${location.state || 'all'}`,
         async () => {
-            const res = await api.get(`/matches/upcoming?t=${Date.now()}`);
+            if (!isLoaded) return [];
+            const stateParam = location.state ? `&state=${encodeURIComponent(location.state)}` : '';
+            const res = await api.get(`/matches/upcoming?t=${Date.now()}${stateParam}`);
             return res.data.data;
-        }
+        },
+        [location.state, isLoaded]
     );
 
     const { data: recent, loading: loadingRecent } = usePersistentData<Match[]>(
-        'all_recent_matches_v3',
+        `all_recent_matches_v3_${location.state || 'all'}`,
         async () => {
-            const res = await api.get(`/matches/recent?t=${Date.now()}`);
+            if (!isLoaded) return [];
+            const stateParam = location.state ? `&state=${encodeURIComponent(location.state)}` : '';
+            const res = await api.get(`/matches/recent?t=${Date.now()}${stateParam}`);
             return res.data.data;
-        }
+        },
+        [location.state, isLoaded]
     );
 
     const matches = activeTab === 'upcoming' ? upcoming || [] : recent || [];

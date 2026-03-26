@@ -1,18 +1,12 @@
-/**
- * Bottom navigation bar — mobile-first design.
- * 5 tabs: Home, Tournaments, Search, My Team, Profile.
- * Uses Lucide icons with active state highlighting.
- */
-
 'use client';
 
+import { NAVIGATION } from '@/content/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { motion } from 'framer-motion';
+import { Home, MessageSquare, Moon, Shield, Sun, Trophy, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Trophy, MessageSquare, Shield, User, Sun, Moon } from 'lucide-react';
-import { NAVIGATION } from '@/content/navigation';
-import { motion } from 'framer-motion';
-import { useTheme } from '@/context/ThemeContext';
-import { useAuth } from '@/context/AuthContext';
 
 export function BottomNav() {
     const pathname = usePathname();

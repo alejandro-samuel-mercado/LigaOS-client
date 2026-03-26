@@ -1,30 +1,27 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import Link from 'next/link';
-import {
-    Search,
-    Filter,
-    MessageSquare,
-    Users,
-    Shield,
-    Trophy,
-    MapPin,
-    ChevronRight,
-    Calendar,
-    ChevronDown,
-    X,
-    ChevronLeft
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/adapters/http';
+import { PublicationCard } from '@/components/features/social/PublicationCard';
 import { LABELS } from '@/content/labels';
 import { ROLE_LABELS } from '@/content/roles';
 import { useAuth } from '@/context/AuthContext';
-import { useSearchParams } from 'next/navigation';
+import { useLocation } from '@/context/LocationContext';
 import { usePersistentData } from '@/hooks/usePersistentData';
-import { PublicationCard } from '@/components/features/social/PublicationCard';
-import { Button } from '@/components/ui/Button';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+    ChevronDown,
+    ChevronRight,
+    Filter,
+    MapPin,
+    MessageSquare,
+    Search,
+    Shield,
+    Trophy,
+    Users
+} from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface SearchResults {
     publications?: Array<any>;
@@ -65,6 +62,7 @@ export default function SocialPage() {
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const { user } = useAuth();
+    const { location, isLoaded } = useLocation();
 
     // Filters
     const [categoryFilter, setCategoryFilter] = useState('');
@@ -140,6 +138,9 @@ export default function SocialPage() {
             if (searchType !== 'all') params.set('type', searchType);
             params.set('page', page.toString());
             params.set('pageSize', '30');
+            
+            // Global Location Context Filter
+            if (location.state) params.set('state', location.state);
 
             // Add filters
             if (searchType === 'teams') {
@@ -187,11 +188,12 @@ export default function SocialPage() {
 
     // Initial search or filter change
     useEffect(() => {
+        if (!isLoaded) return;
         const timer = setTimeout(() => {
             performSearch(query, type, 1, false);
         }, 400);
         return () => clearTimeout(timer);
-    }, [query, type, categoryFilter, divisionFilter, stateFilter, cityFilter, roleFilter, performSearch]);
+    }, [query, type, categoryFilter, divisionFilter, stateFilter, cityFilter, roleFilter, location.state, isLoaded, performSearch]);
 
     // Infinite scroll observer
     const loadingRef = useRef(loading);

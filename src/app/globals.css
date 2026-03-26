@@ -18,15 +18,13 @@
 }
 
 [data-theme='dark'] {
-    /* DARK: #082032, bordo, negro azulado */
     --bg-primary: #000000;
     --bg-secondary: #082032;
     --bg-card: #0c1a26;
     --text-primary: #ffffff;
     --text-secondary: #94a3b8;
-    --accent-primary: #800000;
-    /* Bordo (Maroon) */
-    --accent-secondary: #082032;
+    --accent-primary: #b91c1c;
+    --accent-secondary: #1e3a5f;
     --accent-gold: #fbbf24;
     --border-subtle: #1e293b;
     --glass-bg: rgba(8, 32, 50, 0.8);

@@ -1,7 +1,3 @@
-/**
- * Form labels and field placeholders used throughout the application.
- */
-
 export const LABELS = {
   auth: {
     email: 'Email',

@@ -1,8 +1,3 @@
-/**
- * Error messages mapped from backend error codes to user-facing strings.
- * All error handling in the UI should reference these mappings.
- */
-
 export const ERROR_MESSAGES: Record<string, string> = {
   AUTH_TOKEN_MISSING: 'Debes iniciar sesión para continuar.',
   AUTH_TOKEN_INVALID: 'Tu sesión expiró. Iniciá sesión nuevamente.',

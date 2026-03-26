@@ -1,13 +1,7 @@
-/**
- * Authentication context provider.
- * Stores access token in memory (NOT localStorage) for security.
- * Handles login, register, logout, and auto-refresh on mount.
- */
-
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react';
 import { api, setAccessToken } from '@/adapters/http';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 interface AuthUser {
   id: string;
@@ -18,6 +12,8 @@ interface AuthUser {
   status: string;
   image: string | null;
   publicFields: string[];
+  state?: string | null;
+  country?: string | null;
 }
 
 interface AuthContextType {

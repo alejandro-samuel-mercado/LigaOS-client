@@ -1,22 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useAlert } from '@/context/AlertContext';
 import { api } from '@/adapters/http';
-import {
-    Play,
-    Pause,
-    Square,
-    ChevronLeft,
-    Timer,
-    AlertCircle,
-    Shield
-} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
+import { useAlert } from '@/context/AlertContext';
+import { useAuth } from '@/context/AuthContext';
+import { useSocket } from '@/context/SocketContext';
+import {
+    AlertCircle,
+    ChevronLeft,
+    Pause,
+    Play,
+    Square,
+    Timer
+} from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function RefereePanelPage() {
     const params = useParams();
@@ -178,6 +178,36 @@ export default function RefereePanelPage() {
         }
         fetchMatch();
     }, [matchId, loading, user, router]);
+
+    // Setup real-time updates
+    const { joinRoom, leaveRoom, subscribe } = useSocket();
+    
+    useEffect(() => {
+        if (matchId) {
+            joinRoom(matchId);
+            return () => leaveRoom(matchId);
+        }
+    }, [matchId, joinRoom, leaveRoom]);
+
+    useEffect(() => {
+        const unsubs = [
+            subscribe('match:score_update', (data: any) => {
+                setMatch((prev: any) => {
+                    if (!prev) return prev;
+                    if (data.homeGoals !== undefined) prev.homeGoals = data.homeGoals;
+                    if (data.awayGoals !== undefined) prev.awayGoals = data.awayGoals;
+                    return { ...prev };
+                });
+            }),
+            subscribe('match:status_change', (data: any) => {
+                setMatch((prev: any) => {
+                    if (!prev) return prev;
+                    return { ...prev, status: data.status };
+                });
+            })
+        ];
+        return () => unsubs.forEach(unsub => unsub());
+    }, [subscribe, setMatch]);
 
     const handleUpdateStatus = async (status: string, payload: any = {}) => {
         try {

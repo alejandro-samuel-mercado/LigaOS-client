@@ -5,13 +5,13 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Shield, Plus, Search } from 'lucide-react';
 import { api } from '@/adapters/http';
-import { LABELS } from '@/content/labels';
 import { useAuth } from '@/context/AuthContext';
+import { useLocation } from '@/context/LocationContext';
+import { motion } from 'framer-motion';
+import { Search } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface TeamPreview {
   id: string;
@@ -27,13 +27,15 @@ export default function TeamsPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-
+  const { location, isLoaded } = useLocation();
 
   useEffect(() => {
+    if (!isLoaded) return;
     async function fetchTeams() {
       setLoading(true);
       try {
-        const { data } = await api.get(`/teams?search=${search}&pageSize=50`);
+        const stateQuery = location.state ? `&state=${encodeURIComponent(location.state)}` : '';
+        const { data } = await api.get(`/teams?search=${search}&pageSize=50${stateQuery}`);
         setTeams(data.data);
       } finally {
         setLoading(false);
@@ -41,7 +43,7 @@ export default function TeamsPage() {
     }
     const timer = setTimeout(fetchTeams, 300);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [search, location.state, isLoaded]);
 
   return (
     <div className="main-container px-6 py-12 min-h-screen space-y-12 bg-bg-primary mesh-bg">

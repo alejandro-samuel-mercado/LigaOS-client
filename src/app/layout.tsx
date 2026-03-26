@@ -1,14 +1,13 @@
-/**
- * Root layout — wraps entire application with AuthProvider and Google Fonts.
- * Sets up dark theme, viewport meta for mobile, and PWA manifest.
- */
-
+import { OnboardingModal } from '@/components/features/onboarding/OnboardingModal';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { AlertProvider } from '@/context/AlertContext';
+import { AuthProvider } from '@/context/AuthContext';
+import { LocationProvider } from '@/context/LocationContext';
+import { SocketProvider } from '@/context/SocketContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { AuthProvider } from '@/context/AuthContext';
-import { AlertProvider } from '@/context/AlertContext';
-import { ThemeProvider } from '@/context/ThemeContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -17,10 +16,20 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Liga - Gestión de Liga de Fútbol',
+  title: {
+    default: 'LigaPRO - Gestión de Liga de Fútbol',
+    template: '%s | LigaPRO',
+  },
   description: 'Sistema de gestión de ligas de fútbol de barrio. Torneos, equipos, partidos en tiempo real.',
   manifest: '/manifest.json',
   icons: { icon: '/icon.svg' },
+  openGraph: {
+    type: 'website',
+    locale: 'es_AR',
+    siteName: 'LigaPRO',
+    title: 'LigaPRO - Gestión de Liga de Fútbol',
+    description: 'Sistema de gestión de ligas de fútbol de barrio. Torneos, equipos, partidos en tiempo real.',
+  },
 };
 
 export const viewport: Viewport = {
@@ -43,7 +52,14 @@ export default function RootLayout({
         <ThemeProvider>
           <AlertProvider>
             <AuthProvider>
-              {children}
+              <LocationProvider>
+                <SocketProvider>
+                  <ErrorBoundary>
+                    {children}
+                    <OnboardingModal />
+                  </ErrorBoundary>
+                </SocketProvider>
+              </LocationProvider>
             </AuthProvider>
           </AlertProvider>
         </ThemeProvider>

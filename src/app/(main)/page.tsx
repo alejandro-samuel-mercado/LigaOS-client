@@ -5,14 +5,13 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ChevronRight, Calendar, Clock, MapPin, Search, Shield } from 'lucide-react';
 import { api } from '@/adapters/http';
-import { Input } from '@/components/ui/Input';
-import { LABELS } from '@/content/labels';
-import { MATCH_STATUS_LABELS, MATCH_STATUS_COLORS } from '@/content/match';
+import { MATCH_STATUS_LABELS } from '@/content/match';
+import { useLocation } from '@/context/LocationContext';
+import { motion } from 'framer-motion';
+import { Clock, MapPin, Search, Shield } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface MatchPreview {
     id: string;
@@ -51,15 +50,20 @@ export default function HomePage() {
     const [teams, setTeams] = useState<TeamPreview[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const { location, isLoaded } = useLocation();
 
     useEffect(() => {
+        if (!isLoaded) return;
+        
         async function fetchData() {
             try {
+                setLoading(true);
+                const stateParam = location.state ? `state=${encodeURIComponent(location.state)}&` : '';
                 const [liveRes, upRes, recentRes, teamsRes] = await Promise.all([
-                    api.get(`/matches/live?t=${Date.now()}`).catch(() => ({ data: { data: [] } })),
-                    api.get(`/matches/upcoming?t=${Date.now()}`).catch(() => ({ data: { data: [] } })),
-                    api.get(`/matches/recent?t=${Date.now()}`).catch(() => ({ data: { data: [] } })),
-                    api.get(`/teams?pageSize=12&t=${Date.now()}`).catch(() => ({ data: { data: [] } })),
+                    api.get(`/matches/live?${stateParam}t=${Date.now()}`).catch(() => ({ data: { data: [] } })),
+                    api.get(`/matches/upcoming?${stateParam}t=${Date.now()}`).catch(() => ({ data: { data: [] } })),
+                    api.get(`/matches/recent?${stateParam}t=${Date.now()}`).catch(() => ({ data: { data: [] } })),
+                    api.get(`/teams?${stateParam}pageSize=12&t=${Date.now()}`).catch(() => ({ data: { data: [] } })),
                 ]);
                 setLive(liveRes.data.data);
                 setUpcoming(upRes.data.data);
@@ -70,7 +74,7 @@ export default function HomePage() {
             }
         }
         fetchData();
-    }, []);
+    }, [location.state, isLoaded]);
 
     const filteredLive = live.filter(m =>
         m.homeTeam.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

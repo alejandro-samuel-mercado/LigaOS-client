@@ -1,22 +1,23 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useAlert } from '@/context/AlertContext';
 import { api } from '@/adapters/http';
-import { Trophy, ChevronLeft, MapPin, CalendarDays, Users, Check, X, Shield, MessageSquare, Plus, Award, Search, CheckCircle2, Edit2, Settings, Clock } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { CreateTournamentForm } from '@/components/features/management/CreateTournamentForm';
+import { PublicationCard } from '@/components/features/social/PublicationCard';
+import { AnimatedFixture } from '@/components/features/tournaments/AnimatedFixture';
+import { EditMatchModal } from '@/components/features/tournaments/EditMatchModal';
+import { StartTournamentModal } from '@/components/features/tournaments/StartTournamentModal';
+import { TournamentBracket } from '@/components/features/tournaments/TournamentBracket';
+import { TournamentStats } from '@/components/features/tournaments/TournamentStats';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
-import Link from 'next/link';
-import { PublicationCard } from '@/components/features/social/PublicationCard';
-import { TournamentBracket } from '@/components/features/tournaments/TournamentBracket';
-import { AnimatedFixture } from '@/components/features/tournaments/AnimatedFixture';
-import { StartTournamentModal } from '@/components/features/tournaments/StartTournamentModal';
-import { EditMatchModal } from '@/components/features/tournaments/EditMatchModal';
-import { CreateTournamentForm } from '@/components/features/management/CreateTournamentForm';
+import { useAlert } from '@/context/AlertContext';
+import { useAuth } from '@/context/AuthContext';
 import { usePersistentData } from '@/hooks/usePersistentData';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Award, CalendarDays, CheckCircle2, ChevronLeft, Clock, Edit2, MapPin, Search, Settings, Shield, Trophy, X } from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface Tournament {
     id: string;
@@ -65,7 +66,7 @@ export default function TournamentDetailPage() {
     );
     const myTeams = myTeamsRaw || [];
 
-    const [activeTab, setActiveTab] = useState<'standings' | 'matches' | 'inscriptions' | 'publications' | 'bracket'>('standings');
+    const [activeTab, setActiveTab] = useState<'standings' | 'matches' | 'stats' | 'inscriptions' | 'publications' | 'bracket'>('standings');
     const [activeModal, setActiveModal] = useState<'inscribe' | 'createMatch' | 'createPublication' | 'startTournament' | 'editMatch' | 'editTournament' | null>(null);
     const [generatingBracket, setGeneratingBracket] = useState(false);
     const [selectedMatch, setSelectedMatch] = useState<any>(null);
@@ -348,6 +349,7 @@ export default function TournamentDetailPage() {
                         { id: 'standings', label: 'Posiciones' },
                         ...((tournament.type === 'ELIMINATION' || tournament.type === 'GROUPS_ELIMINATION') ? [{ id: 'bracket', label: 'Bracket' }] : []),
                         { id: 'matches', label: 'Partidos' },
+                        { id: 'stats', label: 'Estadísticas' },
                         ...(isAdmin ? [{ id: 'inscriptions', label: `Inscripciones${pendingInscriptions.length > 0 ? ` (${pendingInscriptions.length})` : ''}` }] : []),
                         { id: 'publications', label: 'Publicaciones' },
                     ].map(tab => (
@@ -605,6 +607,10 @@ export default function TournamentDetailPage() {
                                     </div>
                                 )}
                             </div>
+                        )}
+
+                        {activeTab === 'stats' && (
+                            <TournamentStats tournamentId={tournament.id} />
                         )}
 
                         {activeTab === 'inscriptions' && (

@@ -1,35 +1,32 @@
 'use client';
 
-import { use, useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
 import { api } from '@/adapters/http';
+import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
+import { useAuth } from '@/context/AuthContext';
 import {
-    Trophy,
-    Users,
-    MapPin,
-    Calendar,
-    ChevronLeft,
-    Play,
-    Pause,
-    Square,
     AlertCircle,
-    Clock,
-    Video,
-    Shield,
-    Edit2,
+    Calendar,
     Check,
+    ChevronLeft,
+    Clock,
+    Edit2,
+    MapPin,
+    Shield,
+    Users,
+    Video,
     X
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { Modal } from '@/components/ui/Modal';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import { usePersistentData } from '@/hooks/usePersistentData';
+import { MatchLineupsSection } from '@/components/matches/MatchLineupsSection';
 import { useAlert } from '@/context/AlertContext';
+import { useSocket } from '@/context/SocketContext';
+import { usePersistentData } from '@/hooks/usePersistentData';
 
 interface Match {
     id: string;
@@ -117,6 +114,43 @@ export default function MatchDetailPage() {
             setEditedTime(match.matchTime || '');
         }
     }, [match]);
+
+    // Setup real-time updates
+    const { joinRoom, leaveRoom, subscribe } = useSocket();
+    
+    useEffect(() => {
+        if (matchId) {
+            joinRoom(matchId);
+            return () => leaveRoom(matchId);
+        }
+    }, [matchId, joinRoom, leaveRoom]);
+
+    useEffect(() => {
+        const unsubs = [
+            subscribe('match:event', (event: any) => {
+                setMatch((prev: any) => {
+                    if (!prev) return prev;
+                    return { ...prev, events: [...(prev.events || []), event] };
+                });
+                success('¡Nuevo evento en el partido!');
+            }),
+            subscribe('match:score_update', (data: any) => {
+                setMatch((prev: any) => {
+                    if (!prev) return prev;
+                    if (data.homeGoals !== undefined) prev.homeGoals = data.homeGoals;
+                    if (data.awayGoals !== undefined) prev.awayGoals = data.awayGoals;
+                    return { ...prev };
+                });
+            }),
+            subscribe('match:status_change', (data: any) => {
+                setMatch((prev: any) => {
+                    if (!prev) return prev;
+                    return { ...prev, status: data.status };
+                });
+            })
+        ];
+        return () => unsubs.forEach(unsub => unsub());
+    }, [subscribe, setMatch, success]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -516,6 +550,8 @@ export default function MatchDetailPage() {
                         )}
                     </div>
                 </div>
+
+                <MatchLineupsSection match={match} user={user} onLineupSaved={fetchMatch} />
 
                 {/* Events Timeline Card */}
                 <div className="bg-bg-card border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
