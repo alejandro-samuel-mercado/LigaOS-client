@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, type ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { getAccessToken } from '@/adapters/http';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL ?? 'http://localhost:4000';
 
@@ -25,13 +26,15 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') : 'http://localhost:4000';
-    console.log('Connecting to socket at:', SOCKET_URL);
+
+    const token = getAccessToken();
 
     const socket = io(SOCKET_URL, {
       autoConnect: false,
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
+      auth: token ? { token } : {},
     });
 
     socketRef.current = socket;

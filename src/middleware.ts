@@ -6,8 +6,8 @@ const AUTH_ROUTES = ['/login', '/register'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const refreshToken = request.cookies.get('refreshToken');
-  const hasSession = !!refreshToken;
+  const ligaosSession = request.cookies.get('ligaos_session');
+  const hasSession = !!ligaosSession;
 
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
   if (isProtectedRoute && !hasSession) {

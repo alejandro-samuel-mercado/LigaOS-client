@@ -1,4 +1,5 @@
 import { BottomNav } from '@/components/layout/BottomNav';
+import { WelcomeWizard } from '@/components/features/onboarding/WelcomeWizard';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,6 +8,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       <BottomNav />
+      <WelcomeWizard />
     </div>
   );
 }

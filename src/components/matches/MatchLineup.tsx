@@ -58,7 +58,7 @@ export function MatchLineup({
         ]
       };
       await api.post(`/matches/${matchId}/lineups`, payload);
-      success('Alineación guardada correctamente');
+      success('Convocatoria y Alineación guardadas correctamente');
       setIsEditing(false);
       onLineupSaved();
     } catch (err: any) {
@@ -100,7 +100,7 @@ export function MatchLineup({
             onClick={() => setIsEditing(true)}
             className="text-[10px] bg-white/10 hover:bg-white text-white hover:text-black font-black uppercase px-3 py-1 transition-colors"
           >
-            Editar Alineación
+            Editar Convocatoria / XI
           </button>
         )}
         {isEditing && (
@@ -131,7 +131,7 @@ export function MatchLineup({
         <div>
           <div className="flex justify-between items-end mb-3">
             <h4 className="text-xs font-black text-text-secondary uppercase tracking-[0.2em]">
-              Titulares
+              Titulares (11 Inicial)
             </h4>
             <span className={`text-[10px] font-black ${starters.length === 11 ? 'text-accent-primary' : 'text-text-secondary/50'}`}>
               {starters.length} / 11
@@ -161,7 +161,7 @@ export function MatchLineup({
         <div>
           <div className="flex justify-between items-end mb-3">
             <h4 className="text-xs font-black text-text-secondary uppercase tracking-[0.2em]">
-              Suplentes
+              Suplentes (Banco)
             </h4>
             <span className="text-[10px] font-black text-text-secondary/50">
               {subs.length}
@@ -192,7 +192,7 @@ export function MatchLineup({
         {isEditing && (
           <div className="mt-4 pt-4 border-t-2 border-dashed border-border-subtle">
             <h4 className="text-xs font-black text-text-secondary uppercase tracking-[0.2em] mb-3">
-              Plantel Disponible
+              Jugadores No Convocados
             </h4>
             
             {availablePlayers.length === 0 ? (

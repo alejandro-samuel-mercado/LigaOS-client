@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { api } from '@/adapters/http';
 import { PublicationCard } from '@/components/features/social/PublicationCard';
 import { LABELS } from '@/content/labels';
@@ -51,7 +52,7 @@ const TYPE_FILTERS: Array<{ key: SearchType; label: string; icon: React.ElementT
 const EMPTY_ARRAY: any[] = [];
 const DEFAULT_STATES = ['Buenos Aires', 'CABA', 'Córdoba', 'Santa Fe', 'Mendoza'];
 
-export default function SocialPage() {
+function SocialContent() {
     const searchParams = useSearchParams();
     const initialQuery = searchParams.get('query') || '';
 
@@ -184,7 +185,7 @@ export default function SocialPage() {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [categoryFilter, divisionFilter, stateFilter, cityFilter, roleFilter]);
+    }, [categoryFilter, divisionFilter, stateFilter, cityFilter, roleFilter, location.state]);
 
     // Initial search or filter change
     useEffect(() => {
@@ -223,7 +224,7 @@ export default function SocialPage() {
 
         if (loaderRef.current) observer.observe(loaderRef.current);
         return () => observer.disconnect();
-    }, [type, performSearch, query]); // Reduced dependencies
+    }, [type, performSearch, query]);
 
     const hasResults = (results.publications?.length ?? 0) + (results.users?.length ?? 0) + (results.teams?.length ?? 0) + (results.tournaments?.length ?? 0) > 0;
 
@@ -274,8 +275,6 @@ export default function SocialPage() {
                         >
                             <div className=" bg-black text-white p-3 border-b-8 border-accent-primary relative group">
                                 <div className="absolute top-0 right-0 h-full w-1/3 bg-gradient-to-l from-accent-primary/20 to-transparent pointer-events-none" />
-
-
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
                                     {type === 'teams' ? (
@@ -455,6 +454,14 @@ export default function SocialPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function SocialPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-bg-primary flex items-center justify-center text-accent-primary font-black uppercase tracking-widest italic">Cargando Social...</div>}>
+            <SocialContent />
+        </Suspense>
     );
 }
 

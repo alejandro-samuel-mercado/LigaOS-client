@@ -32,6 +32,7 @@ export interface TeamMembership {
   isActive: boolean;
   joinedAt: string;
   leftAt: string | null;
+  teamRole?: 'PRESIDENT' | 'COACH' | 'PLAYER' | 'STAFF';
   player: PlayerPreview;
 }
 
@@ -110,6 +111,7 @@ export interface MatchEvent {
   minute?: number;
   teamSide?: 'home' | 'away';
   details?: string;
+  corrected?: boolean;
   player?: { name: string; lastName: string };
 }
 
@@ -132,6 +134,9 @@ export interface Tournament extends TournamentPreview {
   state: string | null;
   division: string | null;
   type: TournamentType;
+  winnerId?: string | null;
+  frozenAt?: string | null;
+  winner?: { id: string; name: string } | null;
   teams: any[];
   standings: any[];
   matches: any[];
@@ -172,3 +177,99 @@ export interface PaginationData {
   pageSize: number;
   totalPages: number;
 }
+
+export type NotificationType =
+  | 'MATCH_REMINDER' | 'MATCH_STARTED' | 'GOAL_SCORED' | 'MATCH_FINISHED'
+  | 'TEAM_INVITATION' | 'LINEUP_ANNOUNCED' | 'REFEREE_REQUEST'
+  | 'TOURNAMENT_ENROLLMENT' | 'CARD_RECEIVED' | 'NEW_PUBLICATION'
+  | 'INVITATION_ACCEPTED' | 'INVITATION_REJECTED' | 'GENERAL';
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+  isRead: boolean;
+  matchId?: string | null;
+  teamId?: string | null;
+  tournamentId?: string | null;
+  createdAt: string;
+}
+
+export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED';
+export type TeamRole = 'PRESIDENT' | 'COACH' | 'PLAYER' | 'STAFF';
+
+export interface TeamInvitation {
+  id: string;
+  teamId: string;
+  invitedUserId: string;
+  invitedByUserId: string;
+  teamRole: TeamRole;
+  status: InvitationStatus;
+  message?: string | null;
+  createdAt: string;
+  respondedAt?: string | null;
+  team?: { id: string; name: string; logo?: string | null; city?: string };
+  invitedUser?: { id: string; name: string; lastName: string; image?: string | null };
+  invitedByUser?: { id: string; name: string; lastName: string };
+}
+
+export interface FavoriteTeam {
+  id: string;
+  userId: string;
+  teamId: string;
+  createdAt: string;
+  team?: TeamPreview;
+}
+
+export interface TopScorer {
+  position: number;
+  player: PlayerPreview | null;
+  team: TeamPreview | null;
+  goals: number;
+  matchesPlayed: number;
+}
+
+export interface TeamStreak {
+  results: Array<{
+    matchId: string;
+    result: 'W' | 'D' | 'L';
+    goalsFor: number;
+    goalsAgainst: number;
+    date: string;
+  }>;
+  currentStreak: { type: 'W' | 'D' | 'L' | null; count: number };
+  unbeatenRun: number;
+}
+
+export interface HeadToHead {
+  totalMatches: number;
+  teamAWins: number;
+  teamBWins: number;
+  draws: number;
+  teamAGoals: number;
+  teamBGoals: number;
+  matches: Array<{
+    id: string;
+    homeTeamId: string;
+    awayTeamId: string;
+    homeGoals: number;
+    awayGoals: number;
+    date: string;
+    tournament: { id: string; name: string } | null;
+  }>;
+}
+
+export interface RefereePreview {
+  id: string;
+  name: string;
+  lastName: string;
+  image: string | null;
+  phone?: string;
+  city?: string;
+  state?: string;
+  _count?: { refereedMatches: number };
+}
+

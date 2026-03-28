@@ -37,6 +37,7 @@ import { CreateTeamForm } from '@/components/features/management/CreateTeamForm'
 import { CreateUserForm } from '@/components/features/management/CreateUserForm';
 
 import { usePersistentData } from '@/hooks/usePersistentData';
+import { FavoriteButton } from '@/components/ui/FavoriteButton';
 
 interface Player {
     id: string;
@@ -57,7 +58,7 @@ interface TeamMembership {
     isActive: boolean;
     joinedAt: string;
     leftAt: string | null;
-    player: Player;
+    player: Player & { playerStatus?: string };
 }
 
 interface Team {
@@ -79,6 +80,8 @@ interface Team {
     president?: { id: string, name: string, lastName: string, image?: string };
     coach?: { id: string, name: string, lastName: string, image?: string };
     players: TeamMembership[];
+    homeMatches?: any[];
+    awayMatches?: any[];
 }
 
 export default function TeamDetailPage() {
@@ -100,7 +103,8 @@ export default function TeamDetailPage() {
         [teamId, user?.id]
     );
 
-    const [activeTab, setActiveTab] = useState<'roster' | 'publications' | 'history' | 'signings'>('roster');
+
+    const [activeTab, setActiveTab] = useState<'roster' | 'matches' | 'publications' | 'history' | 'signings'>('roster');
     const [activeModal, setActiveModal] = useState<'assignPlayer' | 'assignCoach' | 'createPublication' | 'manageSignings' | 'editTeam' | null>(null);
 
     const { data: publicationsRaw, loading: publicationsLoading, refresh: fetchPublications } = usePersistentData<any[]>(
@@ -121,7 +125,7 @@ export default function TeamDetailPage() {
     const [playerPosition, setPlayerPosition] = useState('');
     const [assignRole, setAssignRole] = useState<'PLAYER' | 'STAFF'>('PLAYER');
     const [isCreatingPlayer, setIsCreatingPlayer] = useState(false);
-    
+
     // Search state
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -200,6 +204,16 @@ export default function TeamDetailPage() {
             success('Jugador quitado del equipo');
         } catch (err: any) {
             showError(err.response?.data?.message || 'Error al quitar jugador');
+        }
+    };
+
+    const handleUpdatePlayerStatus = async (playerId: string, newStatus: string) => {
+        try {
+            await api.patch(`/users/${playerId}`, { playerStatus: newStatus });
+            fetchTeam();
+            success('Estado del jugador actualizado');
+        } catch (err: any) {
+            showError(err.response?.data?.message || 'Error al actualizar el estado');
         }
     };
 
@@ -310,6 +324,7 @@ export default function TeamDetailPage() {
                             <p className="text-xs font-black text-text-secondary uppercase tracking-widest flex items-center gap-1">
                                 <MapPin size={12} className="text-accent-primary" /> {team.city}, {team.state}
                             </p>
+                            <FavoriteButton teamId={teamId} />
                             {canManage && (
                                 <button
                                     onClick={() => setActiveModal('editTeam')}
@@ -390,6 +405,7 @@ export default function TeamDetailPage() {
                 <div className="flex gap-2 border-b-4 border-black pb-2 mb-8 overflow-x-auto no-scrollbar">
                     {[
                         { id: 'roster', label: 'Plantel', icon: <User size={16} /> },
+                        { id: 'matches', label: 'Partidos', icon: <Calendar size={16} /> },
                         { id: 'publications', label: 'Muro', icon: <MessageSquare size={16} /> },
                         { id: 'history', label: 'Historial', icon: <History size={16} /> },
                         { id: 'signings', label: 'Fichajes', icon: <Target size={16} /> },
@@ -438,11 +454,35 @@ export default function TeamDetailPage() {
                                                     </div>
                                                 </div>
                                             </Link>
-                                            <div className="flex flex-col items-end gap-2">
-                                                {canManageSports && (
-                                                    <button onClick={() => handleRemovePlayer(m.player.id)} className="p-2 text-red-600 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600/10 border border-transparent hover:border-red-600" title="Quitar del equipo">
-                                                        <Plus size={18} className="rotate-45" />
-                                                    </button>
+                                            <div className="flex flex-col items-end gap-2 text-right">
+                                                {canManageSports ? (
+                                                    <>
+                                                        <select
+                                                            value={m.player.playerStatus || 'ACTIVE'}
+                                                            onChange={(e) => handleUpdatePlayerStatus(m.player.id, e.target.value)}
+                                                            className={`text-[9px] font-black uppercase px-2 py-1 outline-none cursor-pointer border-2 border-transparent hover:border-black transition-all ${m.player.playerStatus === 'INJURED' ? 'bg-red-600 text-white' :
+                                                                    m.player.playerStatus === 'INACTIVE' ? 'bg-bg-secondary text-text-secondary' :
+                                                                        'bg-green-500 text-black'
+                                                                }`}
+                                                        >
+                                                            <option value="ACTIVE" className="bg-white text-black">ACTIVO</option>
+                                                            <option value="INJURED" className="bg-white text-black">LESIONADO</option>
+                                                            <option value="RESTING" className="bg-white text-black">DESCANSO</option>
+                                                            <option value="INACTIVE" className="bg-white text-black">INACTIVO</option>
+                                                        </select>
+                                                        <button onClick={() => handleRemovePlayer(m.player.id)} className="p-2 text-red-600 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600/10 border border-transparent hover:border-red-600" title="Quitar del equipo">
+                                                            <Plus size={18} className="rotate-45" />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <span className={`text-[9px] font-black uppercase px-2 py-1 ${m.player.playerStatus === 'INJURED' ? 'bg-red-600 text-white' :
+                                                            m.player.playerStatus === 'INACTIVE' ? 'bg-bg-secondary text-text-secondary' :
+                                                                'bg-green-500 text-black'
+                                                        }`}>
+                                                        {m.player.playerStatus === 'INJURED' ? 'LESIONADO' :
+                                                            m.player.playerStatus === 'INACTIVE' ? 'INACTIVO' :
+                                                                m.player.playerStatus === 'RESTING' ? 'DESCANSO' : 'ACTIVO'}
+                                                    </span>
                                                 )}
                                             </div>
                                         </div>
@@ -468,6 +508,47 @@ export default function TeamDetailPage() {
                                             )}
                                         </>
                                     );
+                                })()}
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'matches' && (
+                        <motion.div key="matches" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                            <h2 className="text-2xl font-black text-text-primary italic uppercase tracking-tighter">Calendario y Resultados</h2>
+                            <div className="grid gap-4">
+                                {(() => {
+                                    const allMatches = [...(team.homeMatches || []), ...(team.awayMatches || [])]
+                                        .sort((a, b) => new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime());
+
+                                    if (allMatches.length === 0) {
+                                        return <div className="py-20 text-center border-4 border-dashed border-black/10">
+                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">No hay partidos registrados</p>
+                                        </div>;
+                                    }
+
+                                    return allMatches.map((m: any) => {
+                                        const isHome = m.homeTeam?.id === team.id || m.homeTeamId === team.id;
+                                        const opponent = isHome ? m.awayTeam : m.homeTeam;
+
+                                        return (
+                                            <Link href={`/matches/${m.id}`} key={m.id} className="bg-bg-card border-2 border-black p-5 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all flex items-center justify-between group">
+                                                <div className="flex-1">
+                                                    <span className="text-[9px] font-black text-accent-primary uppercase tracking-widest block mb-1">{m.tournament?.name} • {new Date(m.matchDate).toLocaleDateString()}</span>
+                                                    <div className="flex items-center gap-4">
+                                                        <span className={`text-lg font-black uppercase italic ${isHome ? 'text-text-primary' : 'text-text-secondary'}`}>{team.nameShort || team.name}</span>
+                                                        <div className="bg-bg-secondary border-2 border-border-subtle px-3 py-1 text-sm font-black tabular-nums tracking-widest">
+                                                            {m.status === 'FINISHED' ? `${isHome ? m.homeGoals : m.awayGoals} - ${isHome ? m.awayGoals : m.homeGoals}` : 'VS'}
+                                                        </div>
+                                                        <span className={`text-lg font-black uppercase italic ${!isHome ? 'text-text-primary' : 'text-text-secondary'}`}>{opponent?.nameShort || opponent?.name || '???'}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex h-10 w-10 items-center justify-center bg-black text-accent-primary group-hover:bg-accent-primary group-hover:text-white transition-all">
+                                                    <Calendar size={18} />
+                                                </div>
+                                            </Link>
+                                        );
+                                    });
                                 })()}
                             </div>
                         </motion.div>
@@ -560,7 +641,7 @@ export default function TeamDetailPage() {
                 title={isCreatingPlayer ? "Inscribir Nuevo Miembro" : "Añadir Miembro al Plantel"}
             >
                 {isCreatingPlayer ? (
-                    <CreateUserForm 
+                    <CreateUserForm
                         role={assignRole}
                         onSuccess={() => {
                             setIsCreatingPlayer(false);
@@ -574,7 +655,7 @@ export default function TeamDetailPage() {
                     <form onSubmit={handleAssignPlayer} className="space-y-4">
                         <div className="space-y-3">
                             <label className="text-[10px] font-black uppercase text-text-secondary ml-1 tracking-widest">Buscar Usuario (Nombre, DNI o Correo)</label>
-                            
+
                             {selectedPlayerId ? (
                                 <div className="p-3 bg-accent-primary/10 border-2 border-accent-primary flex justify-between items-center">
                                     <span className="font-bold text-sm">{selectedPlayerName}</span>
@@ -582,19 +663,19 @@ export default function TeamDetailPage() {
                                 </div>
                             ) : (
                                 <div className="relative">
-                                    <Input 
-                                        placeholder="Escribe para buscar..." 
+                                    <Input
+                                        placeholder="Escribe para buscar..."
                                         value={searchQuery}
                                         onChange={e => setSearchQuery(e.target.value)}
                                         autoComplete="off"
                                     />
                                     {isSearching && <div className="absolute right-3 top-3"><Loader2 size={16} className="animate-spin text-accent-primary" /></div>}
-                                    
+
                                     {searchQuery && !isSearching && searchResults.length > 0 && (
                                         <div className="absolute z-10 w-full mt-1 bg-bg-card border-2 border-black max-h-48 overflow-y-auto shadow-xl">
                                             {searchResults.map(res => (
-                                                <div 
-                                                    key={res.id} 
+                                                <div
+                                                    key={res.id}
                                                     onClick={() => { setSelectedPlayerId(res.id); setSelectedPlayerName(`${res.name} ${res.lastName}`); }}
                                                     className="p-3 border-b border-border-subtle hover:bg-bg-secondary cursor-pointer flex flex-col"
                                                 >

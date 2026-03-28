@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { Clock, MapPin, Search, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { InvitationsPanel } from '@/components/features/invitations/InvitationsPanel';
 
 interface MatchPreview {
     id: string;
@@ -193,6 +194,7 @@ export default function HomePage() {
 
                     {/* Sidebar Area */}
                     <div className="lg:col-span-3 space-y-12">
+                        <InvitationsPanel />
                         <section className="bg-black p-6 border-b-8 border-accent-primary">
                             <h4 className="text-white font-black uppercase tracking-widest text-sm mb-6 flex items-center gap-2">
                                 <div className="h-2 w-2 bg-accent-primary animate-pulse" />

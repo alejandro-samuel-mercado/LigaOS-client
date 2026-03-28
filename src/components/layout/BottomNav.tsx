@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Home, MessageSquare, Moon, Shield, Sun, Trophy, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { NotificationBell } from '../features/notifications/NotificationBell';
 
 export function BottomNav() {
     const pathname = usePathname();
@@ -31,6 +32,8 @@ export function BottomNav() {
             >
                 {theme === 'light' ? <Moon size={20} className="text-slate-200" /> : <Sun size={20} className="text-amber-400" />}
             </button>
+
+            <NotificationBell />
 
             <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border-subtle bg-bg-secondary/90 backdrop-blur-2xl safe-area-bottom shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
                 <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">

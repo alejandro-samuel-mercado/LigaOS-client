@@ -4,9 +4,13 @@ import { AlertProvider } from '@/context/AlertContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { SocketProvider } from '@/context/SocketContext';
+import { NotificationProvider } from '@/context/NotificationContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import { PushNotificationManager } from '@/components/features/notifications/PushNotificationManager';
+import { PageTransition } from '@/components/ui/PageTransition';
+import { ProductTour } from '@/components/features/onboarding/ProductTour';
 import './globals.css';
 
 const inter = Inter({
@@ -22,7 +26,7 @@ export const metadata: Metadata = {
   },
   description: 'Sistema de gestión de ligas de fútbol de barrio. Torneos, equipos, partidos en tiempo real.',
   manifest: '/manifest.json',
-  icons: { icon: '/icon.svg' },
+  icons: { icon: '/icon.png' },
   openGraph: {
     type: 'website',
     locale: 'es_AR',
@@ -37,7 +41,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#050a15',
+  themeColor: '#ccff00',
   viewportFit: 'cover',
 };
 
@@ -54,10 +58,16 @@ export default function RootLayout({
             <AuthProvider>
               <LocationProvider>
                 <SocketProvider>
+                  <NotificationProvider>
                   <ErrorBoundary>
-                    {children}
+                    <PageTransition>
+                      {children}
+                    </PageTransition>
+                    <PushNotificationManager />
                     <OnboardingModal />
+                    <ProductTour />
                   </ErrorBoundary>
+                  </NotificationProvider>
                 </SocketProvider>
               </LocationProvider>
             </AuthProvider>

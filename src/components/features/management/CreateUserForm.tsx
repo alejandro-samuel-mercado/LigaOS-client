@@ -6,7 +6,9 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { api } from '@/adapters/http';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Camera, User } from 'lucide-react';
+import { useAlert } from '@/context/AlertContext';
 
 const userSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -20,6 +22,7 @@ const userSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   country: z.string().optional(),
+  image: z.string().optional(),
   role: z.enum(['PLAYER', 'REFEREE', 'COACH', 'PRESIDENT']),
 });
 
@@ -32,11 +35,16 @@ interface CreateUserFormProps {
 }
 
 export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProps) {
+  const { error: alertError, success: alertSuccess } = useAlert();
   const [error, setError] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
@@ -45,6 +53,29 @@ export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProp
       country: 'Argentina',
     },
   });
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const res = await api.post('/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        setValue('image', res.data.data.url);
+        alertSuccess('Foto subida correctamente');
+    } catch (err: any) {
+        alertError(err.response?.data?.message || 'Error al subir la foto');
+    } finally {
+        setUploadingImage(false);
+    }
+  };
+
+  const currentImage = watch('image');
 
   const onSubmit = async (data: any) => {
     setError(null);
@@ -75,6 +106,35 @@ export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProp
           {error}
         </div>
       )}
+
+      {/* Profile Photo */}
+      <div className="flex flex-col items-center gap-4 mb-6">
+          <label className="text-[10px] font-black uppercase text-text-secondary tracking-widest px-1 self-start">Foto de Perfil</label>
+          <div className="relative group">
+              <div className="h-24 w-24 bg-black border-4 border-bg-secondary flex items-center justify-center overflow-hidden rounded-full shrink-0">
+                  {currentImage ? (
+                      <img src={currentImage} alt="Perfil" className="h-full w-full object-cover" />
+                  ) : (
+                      <User size={40} className="text-text-secondary opacity-20" />
+                  )}
+              </div>
+              <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className={`absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center border-2 border-black bg-accent-primary text-black rounded-full shadow-md hover:scale-110 active:scale-95 transition-all ${uploadingImage ? 'opacity-50' : ''}`}
+              >
+                  <Camera size={14} strokeWidth={3} className={uploadingImage ? 'animate-pulse' : ''} />
+              </button>
+              <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+              />
+          </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input
@@ -164,7 +224,7 @@ export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProp
           isLoading={isSubmitting}
           className="flex-1"
         >
-          Inscribir {roleLabel[role as string] || 'Miembro'}
+          Inscribir {roleLabels[role as string] || 'Miembro'}
         </Button>
       </div>
     </form>

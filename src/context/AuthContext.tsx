@@ -2,6 +2,7 @@
 
 import { api, setAccessToken } from '@/adapters/http';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import Cookies from 'js-cookie';
 
 interface AuthUser {
   id: string;
@@ -48,9 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAccessToken(data.data.accessToken);
       const { data: meData } = await api.get('/auth/me');
       setUser(meData.data);
+      Cookies.set('ligaos_session', 'true', { expires: 365 });
     } catch {
       setUser(null);
       setAccessToken(null);
+      Cookies.remove('ligaos_session');
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await api.post('/auth/login', { email, password });
       setAccessToken(data.data.accessToken);
       setUser(data.data.user);
+      Cookies.set('ligaos_session', 'true', { expires: 365 });
     } finally {
       isAuthenticating.current = false;
     }
@@ -81,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await api.post('/auth/register', registerData);
       setAccessToken(data.data.accessToken);
       setUser(data.data.user);
+      Cookies.set('ligaos_session', 'true', { expires: 365 });
     } finally {
       isAuthenticating.current = false;
     }
@@ -92,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setUser(null);
       setAccessToken(null);
+      Cookies.remove('ligaos_session');
     }
   }, []);
 

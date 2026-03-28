@@ -45,7 +45,7 @@ export function MatchLineupsSection({ match, user, onLineupSaved }: { match: any
     <div className="bg-bg-card border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mt-8">
       <div className="p-8">
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-text-secondary opacity-60 mb-6 text-center">
-          Alineaciones
+          Convocatorias y Alineaciones
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

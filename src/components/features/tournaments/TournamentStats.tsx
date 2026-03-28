@@ -2,8 +2,9 @@
 
 import { usePersistentData } from '@/hooks/usePersistentData';
 import { api } from '@/adapters/http';
-import { User, Trophy, AlertTriangle } from 'lucide-react';
+import { User, Trophy, AlertTriangle, BarChart as ChartIcon } from 'lucide-react';
 import Link from 'next/link';
+import { ScorersChart } from './ScorersChart';
 
 interface StatsProps {
   tournamentId: string;
@@ -72,6 +73,12 @@ function StatColumn({ title, icon, data, type }: any) {
         <h3 className="font-black uppercase tracking-widest text-sm">{title}</h3>
       </div>
       <div className="p-4 flex flex-col gap-2">
+        {type === 'goals' && data.length > 0 && (
+          <ScorersChart data={data.map((item: any) => ({ 
+            name: `${item.player.name} ${item.player.lastName[0]}.`, 
+            goals: item.goals 
+          }))} />
+        )}
         {data.length === 0 ? (
           <div className="text-center p-4 text-text-secondary text-[10px] uppercase font-black tracking-widest">
             Sin registros

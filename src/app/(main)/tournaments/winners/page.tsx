@@ -5,16 +5,20 @@ import { useRouter } from 'next/navigation';
 import { Trophy, ChevronLeft, Award, Medal, Shield } from 'lucide-react';
 import { api } from '@/adapters/http';
 import { motion } from 'framer-motion';
+import { useLocation } from '@/context/LocationContext';
 
 export default function WinnersPage() {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { location, isLoaded } = useLocation();
 
   useEffect(() => {
+    if (!isLoaded) return;
     async function fetchStats() {
       try {
-        const res = await api.get('/tournaments/winners/stats');
+        const stateQuery = location.state ? `?state=${encodeURIComponent(location.state)}` : '';
+        const res = await api.get(`/tournaments/winners/stats${stateQuery}`);
         setData(res.data.data);
       } catch (err) {
         console.error(err);
@@ -23,7 +27,7 @@ export default function WinnersPage() {
       }
     }
     fetchStats();
-  }, []);
+  }, [location.state, isLoaded]);
 
   if (loading) return <div className="p-8 text-center text-text-secondary">Cargando rankings...</div>;
 

@@ -197,12 +197,15 @@ export default function ProfilePage() {
                     <ChevronRight size={24} strokeWidth={3} />
                 </button>
 
-                <button className="flex w-full items-center justify-between p-8 bg-bg-card border-2 border-black hover:bg-bg-secondary transition-all hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 group">
+                <button 
+                    onClick={() => router.push(`/players/${user.id}`)}
+                    className="flex w-full items-center justify-between p-8 bg-bg-card border-2 border-black hover:bg-bg-secondary transition-all hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 group"
+                >
                     <div className="flex items-center gap-6">
-                        <div className="text-3xl grayscale group-hover:grayscale-0 transition-all">📊</div>
+                        <div className="text-3xl grayscale group-hover:grayscale-0 transition-all">🏆</div>
                         <div className="text-left space-y-1">
-                            <span className="block font-black uppercase text-xl italic tracking-tighter">Estadísticas</span>
-                            <span className="text-[10px] opacity-40 uppercase font-black tracking-widest block">Rendimiento Histórico</span>
+                            <span className="block font-black uppercase text-xl italic tracking-tighter">Estadísticas y Palmarés</span>
+                            <span className="text-[10px] opacity-40 uppercase font-black tracking-widest block">Mi Perfil Público / Historial</span>
                         </div>
                     </div>
                     <ChevronRight size={24} strokeWidth={3} />
