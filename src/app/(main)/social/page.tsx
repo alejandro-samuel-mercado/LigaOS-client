@@ -139,15 +139,15 @@ function SocialContent() {
             if (searchType !== 'all') params.set('type', searchType);
             params.set('page', page.toString());
             params.set('pageSize', '30');
+                        // Global Location Context Filter
+            // For users, we default to global search unless a state is explicitly picked in the page
+            const activeState = stateFilter || (searchType !== 'users' ? location.state : '');
+            if (activeState) params.set('state', activeState);
             
-            // Global Location Context Filter
-            if (location.state) params.set('state', location.state);
-
-            // Add filters
+            // Add other filters
             if (searchType === 'teams') {
                 if (categoryFilter) params.set('category', categoryFilter);
                 if (divisionFilter) params.set('division', divisionFilter);
-                if (stateFilter) params.set('state', stateFilter);
                 if (cityFilter) params.set('city', cityFilter);
             }
             if (searchType === 'users' && roleFilter) {
@@ -326,10 +326,18 @@ function SocialContent() {
                 </AnimatePresence>
 
                 {loading && !hasResults ? (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-40 w-full rounded-[2.5rem] border border-border-subtle relative overflow-hidden bg-bg-secondary shadow-sm">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-primary/5 to-transparent -translate-x-full animate-shimmer" />
+                            <div key={i} className="h-40 w-full bg-bg-card border-2 border-black/5 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/5 to-transparent -translate-x-full animate-shimmer" />
+                                <div className="p-6 flex gap-5">
+                                    <div className="h-16 w-16 bg-black/5" />
+                                    <div className="flex-1 space-y-3">
+                                        <div className="h-4 w-1/3 bg-black/5" />
+                                        <div className="h-2 w-full bg-black/5" />
+                                        <div className="h-2 w-2/3 bg-black/5" />
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -344,23 +352,24 @@ function SocialContent() {
                         </div>
                     </div>
                 ) : (
-                    <div className="relative">
-                        {loading && (
-                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
-                                <div className="bg-accent-primary text-white text-[10px] font-black px-5 py-2 rounded-full shadow-2xl shadow-accent-primary/40 flex items-center gap-2 border border-white/20 animate-bounce">
-                                    <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    ACTUALIZANDO
+                        <div className="relative min-h-[400px]">
+                            {loading && (
+                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20">
+                                    <div className="bg-accent-primary text-white text-[10px] font-black px-5 py-2 rounded-full shadow-2xl shadow-accent-primary/40 flex items-center gap-2 border border-white/20 animate-bounce">
+                                        <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ACTUALIZANDO
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                        <AnimatePresence mode="wait">
+                            )}
+                            <AnimatePresence mode="popLayout">
                             <motion.div
-                                key={`${query}-${type}-${categoryFilter}-${divisionFilter}-${stateFilter}-${cityFilter}`}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="space-y-8"
-                            >
+                                    key={`${query}-${type}-${categoryFilter}-${divisionFilter}-${stateFilter}-${cityFilter}`}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                                    className="space-y-8"
+                                >
                                 {results.publications && results.publications.length > 0 && (
                                     <ResultSection title="Publicaciones" icon={MessageSquare}>
                                         {results.publications.map((pub) => (

@@ -1,6 +1,7 @@
 'use client';
 
 import { api } from '@/adapters/http';
+import { MATCH_EVENT_LABELS, MATCH_STATUS_LABELS } from '@/content/match';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Input } from '@/components/ui/Input';
@@ -371,11 +372,7 @@ export default function MatchDetailPage() {
                                             <span className="text-[20px] font-black italic tabular-nums">{timerDisplay}</span>
                                             <span className="text-[8px] opacity-60">Tiempo Transcurrido</span>
                                         </div>
-                                    ) : 
-                                     match.status === 'POSTPONED' ? 'Postergado' :
-                                     match.status === 'ANNULLED' ? 'Anulado' :
-                                     match.status === 'HALFTIME' ? 'Entretiempo' :
-                                     match.status}
+                                    ) : (MATCH_STATUS_LABELS[match.status] || match.status)}
                                 </span>
                             </div>
                         </div>
@@ -394,13 +391,15 @@ export default function MatchDetailPage() {
                                 Panel de Árbitro
                             </Link>
                         )}
-                        <button 
-                            onClick={() => setShowStreamModal(true)} 
-                            className={`${hasActiveStream ? 'bg-black text-accent-primary border border-accent-primary' : 'bg-red-600 text-white'} px-6 py-3 font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]`}
-                        >
-                            <Video size={16} />
-                            {hasActiveStream ? 'Actualizar Transmisión' : 'Transmitir en Vivo'}
-                        </button>
+                        {match.status !== 'FINISHED' && (
+                            <button 
+                                onClick={() => setShowStreamModal(true)} 
+                                className={`${hasActiveStream ? 'bg-black text-accent-primary border border-accent-primary' : 'bg-red-600 text-white'} px-6 py-3 font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]`}
+                            >
+                                <Video size={16} />
+                                {hasActiveStream ? 'Actualizar Transmisión' : 'Transmitir en Vivo'}
+                            </button>
+                        )}
                     </div>
 
                     {hasActiveStream && streamEmbedUrl && (
@@ -438,7 +437,7 @@ export default function MatchDetailPage() {
                     <div className="p-8">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-sm font-black uppercase tracking-[0.3em] text-text-secondary opacity-60">Información General</h2>
-                            {isAdmin && (
+                            {isAdmin && match.status !== 'FINISHED' && (
                                 <button
                                     onClick={() => isEditing ? handleUpdateMatch() : setIsEditing(true)}
                                     className={`h-10 w-10 flex items-center justify-center border-2 border-black transition-all ${isEditing ? 'bg-accent-primary text-white' : 'bg-bg-secondary hover:bg-black hover:text-white'}`}
@@ -596,7 +595,7 @@ export default function MatchDetailPage() {
                                                     )}
                                                 </div>
                                                 <div className="text-sm font-black text-text-primary uppercase tracking-tight">
-                                                    {event.type === 'WARNING' ? 'Comentario' : event.type}
+                                                    {MATCH_EVENT_LABELS[event.type] || event.type}
                                                 </div>
                                                 {event.details && (
                                                     <p className="text-xs text-text-secondary mt-2 italic border-l-2 border-accent-primary pl-2">"{event.details}"</p>

@@ -1,6 +1,7 @@
 'use client';
 
 import { api } from '@/adapters/http';
+import { MATCH_STATUS_LABELS } from '@/content/match';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
@@ -286,8 +287,9 @@ export default function RefereePanelPage() {
     if (!match) return <div className="p-8 text-center text-red-500 font-black uppercase">Partido no encontrado</div>;
 
     const isEliminatory = match.tournament?.type === 'ELIMINATION' || match.tournament?.type === 'GROUPS_ELIMINATION';
-    const canEdit = match.status === 'LIVE';
-    const canFinish = match.status === 'LIVE' && match.secondHalfStartTime;
+    const isFinished = match.status === 'FINISHED';
+    const canEdit = match.status === 'LIVE' && !isFinished;
+    const canFinish = match.status === 'LIVE' && match.secondHalfStartTime && !isFinished;
 
     return (
         <div className="min-h-screen bg-bg-primary text-text-primary p-4 md:p-8 font-inter relative overflow-hidden">
@@ -310,7 +312,7 @@ export default function RefereePanelPage() {
                 </button>
                 <div className="text-center">
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-primary animate-pulse">
-                        {match.status === 'UPCOMING' ? 'POR INICIAR' : match.status === 'LIVE' ? 'EN VIVO' : match.status === 'HALFTIME' ? 'ENTRETIEMPO' : match.status}
+                        {MATCH_STATUS_LABELS[match.status]?.toUpperCase() || match.status}
                     </p>
                     <h1 className="text-2xl font-black italic uppercase tracking-tighter">Panel Árbitro</h1>
                 </div>
@@ -329,7 +331,7 @@ export default function RefereePanelPage() {
                     <TeamControl
                         team={match.homeTeam}
                         score={match.homeGoals}
-                        disabled={!canEdit}
+                        disabled={!canEdit || isFinished}
                         onScoreChange={(d: number) => handleScoreChange('home', d)}
                         onQuickEvent={(t: string) => handleQuickEvent(t, 'home')}
                     />
@@ -337,7 +339,7 @@ export default function RefereePanelPage() {
                     <TeamControl
                         team={match.awayTeam}
                         score={match.awayGoals}
-                        disabled={!canEdit}
+                        disabled={!canEdit || isFinished}
                         onScoreChange={(d: number) => handleScoreChange('away', d)}
                         onQuickEvent={(t: string) => handleQuickEvent(t, 'away')}
                     />

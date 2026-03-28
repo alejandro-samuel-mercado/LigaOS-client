@@ -3,8 +3,8 @@
  */
 
 export const MATCH_STATUS_LABELS: Record<string, string> = {
-  UPCOMING: 'Próximo',
-  LIVE: 'En Juego',
+  UPCOMING: 'Programado',
+  LIVE: 'En Vivo',
   HALFTIME: 'Entretiempo',
   FINISHED: 'Finalizado',
   SUSPENDED: 'Suspendido',
@@ -18,11 +18,11 @@ export const MATCH_EVENT_LABELS: Record<string, string> = {
   YELLOW_CARD: 'Tarjeta Amarilla',
   RED_CARD: 'Tarjeta Roja',
   SUBSTITUTION: 'Cambio',
-  WARNING: 'Llamado de atención',
-  MATCH_START: 'Inicio del partido',
-  HALFTIME_START: 'Inicio de entretiempo',
-  HALFTIME_END: 'Fin de entretiempo',
-  MATCH_END: 'Fin del partido',
+  WARNING: 'Comentario',
+  MATCH_START: 'Inicio del Partido',
+  HALFTIME_START: 'Inicio Entretiempo',
+  HALFTIME_END: 'Fin Entretiempo',
+  MATCH_END: 'Fin del Partido',
 };
 
 export const PLAYER_STATUS_LABELS: Record<string, string> = {

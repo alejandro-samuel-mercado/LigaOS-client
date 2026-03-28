@@ -19,7 +19,7 @@ export default function MyTeamPage() {
         'my_teams_list',
         async () => {
             if (!isAuthenticated) return [];
-            const { data } = await api.get('/teams?pageSize=100');
+            const { data } = await api.get('/teams/my');
             return data.data;
         },
         [isAuthenticated]
@@ -41,20 +41,10 @@ export default function MyTeamPage() {
             return;
         }
 
-        if (!teamsLoading && teams.length > 0) {
-            const myTeams = teams.filter((t: any) =>
-                t.president?.id === user?.id ||
-                t.coach?.id === user?.id ||
-                (t._count?.players > 0 && t.players?.some((p: any) => p.player?.id === user?.id))
-            );
-
-            if (myTeams.length === 1) {
-                router.replace(`/teams/${myTeams[0].id}`);
-            } else if (myTeams.length === 0) {
-                setError('No estás asociado a ningún equipo.');
-            }
-        } else if (!teamsLoading && teams.length === 0) {
+        if (!teamsLoading && teams.length === 0) {
             setError('No estás asociado a ningún equipo.');
+        } else if (!teamsLoading && teams.length === 1) {
+            router.replace(`/teams/${teams[0].id}`);
         }
     }, [authLoading, isAuthenticated, user, router, teams, teamsLoading]);
 
@@ -133,7 +123,9 @@ export default function MyTeamPage() {
                             <div className="flex-1 min-w-0">
                                 <h3 className="font-black text-text-primary group-hover:text-accent-primary transition-colors uppercase italic tracking-tight text-lg leading-none">{team.name}</h3>
                                 <p className="text-[10px] text-accent-primary uppercase tracking-widest font-black mt-1">
-                                    {team.president?.id === user?.id ? 'Presidente' : team.coach?.id === user?.id ? 'DT' : 'Jugador'}
+                                    {team.president?.id === user?.id ? 'Presidente' : 
+                                     team.coach?.id === user?.id ? 'DT' : 
+                                     team.players?.[0]?.teamRole || 'Jugador'}
                                 </p>
                             </div>
                             <div className="flex h-10 w-10 items-center justify-center bg-black text-accent-primary group-hover:bg-accent-primary group-hover:text-white transition-all">

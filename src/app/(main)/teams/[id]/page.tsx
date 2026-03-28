@@ -53,6 +53,7 @@ interface Player {
 
 interface TeamMembership {
     id: string;
+    teamRole: string;
     number: number | null;
     position: string | null;
     isActive: boolean;
@@ -139,7 +140,9 @@ export default function TeamDetailPage() {
         const timer = setTimeout(async () => {
             setIsSearching(true);
             try {
-                const res = await api.get(`/users?search=${encodeURIComponent(searchQuery)}&pageSize=5&unassigned=true`);
+                // If the modal is manageSignings, we don't include unassigned=true to allow tracking any player
+                const unassignedParam = activeModal === 'manageSignings' ? '' : '&unassigned=true';
+                const res = await api.get(`/users?search=${encodeURIComponent(searchQuery)}&pageSize=5${unassignedParam}`);
                 setSearchResults(res.data.data);
             } catch (err) { }
             finally { setIsSearching(false); }
@@ -437,8 +440,8 @@ export default function TeamDetailPage() {
 
                             <div className="grid gap-3">
                                 {(() => {
-                                    const actualPlayers = currentPlayers.filter(m => !m.player.role || m.player.role === 'PLAYER' || m.player.role === 'USER');
-                                    const staffMembers = currentPlayers.filter(m => m.player.role === 'STAFF' || m.player.role === 'COACH' || m.player.role === 'PRESIDENT');
+                                    const actualPlayers = currentPlayers.filter(m => m.teamRole === 'PLAYER');
+                                    const staffMembers = currentPlayers.filter(m => m.teamRole !== 'PLAYER');
 
                                     const renderMember = (m: any) => (
                                         <div key={m.id} className="group bg-bg-card border-2 border-black p-5 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-between">
@@ -449,7 +452,9 @@ export default function TeamDetailPage() {
                                                 <div>
                                                     <p className="text-sm font-black text-text-primary uppercase group-hover:text-accent-primary transition-colors italic">{m.player?.name} {m.player?.lastName}</p>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-black px-2 py-0.5 bg-accent-primary text-white uppercase">{m.position || 'Gral'}</span>
+                                                        <span className={`text-[10px] font-black px-2 py-0.5 uppercase ${m.teamRole !== 'PLAYER' ? 'bg-black text-accent-primary border border-accent-primary' : 'bg-accent-primary text-white'}`}>
+                                                            {m.teamRole !== 'PLAYER' ? m.teamRole : (m.position || 'Gral')}
+                                                        </span>
                                                         {m.number && <span className="text-[10px] font-bold text-text-secondary">#{m.number}</span>}
                                                     </div>
                                                 </div>
@@ -460,9 +465,9 @@ export default function TeamDetailPage() {
                                                         <select
                                                             value={m.player.playerStatus || 'ACTIVE'}
                                                             onChange={(e) => handleUpdatePlayerStatus(m.player.id, e.target.value)}
-                                                            className={`text-[9px] font-black uppercase px-2 py-1 outline-none cursor-pointer border-2 border-transparent hover:border-black transition-all ${m.player.playerStatus === 'INJURED' ? 'bg-red-600 text-white' :
-                                                                    m.player.playerStatus === 'INACTIVE' ? 'bg-bg-secondary text-text-secondary' :
-                                                                        'bg-green-500 text-black'
+                                                            className={`text-[15px] font-black uppercase px-2 py-1 outline-none cursor-pointer border-2 border-transparent hover:border-black transition-all ${m.player.playerStatus === 'INJURED' ? 'bg-red-600 text-white' :
+                                                                m.player.playerStatus === 'INACTIVE' ? 'bg-bg-secondary text-text-secondary' :
+                                                                    'bg-green-500 text-black'
                                                                 }`}
                                                         >
                                                             <option value="ACTIVE" className="bg-white text-black">ACTIVO</option>
@@ -474,16 +479,26 @@ export default function TeamDetailPage() {
                                                             <Plus size={18} className="rotate-45" />
                                                         </button>
                                                     </>
-                                                ) : (
-                                                    <span className={`text-[9px] font-black uppercase px-2 py-1 ${m.player.playerStatus === 'INJURED' ? 'bg-red-600 text-white' :
-                                                            m.player.playerStatus === 'INACTIVE' ? 'bg-bg-secondary text-text-secondary' :
-                                                                'bg-green-500 text-black'
-                                                        }`}>
-                                                        {m.player.playerStatus === 'INJURED' ? 'LESIONADO' :
-                                                            m.player.playerStatus === 'INACTIVE' ? 'INACTIVO' :
-                                                                m.player.playerStatus === 'RESTING' ? 'DESCANSO' : 'ACTIVO'}
-                                                    </span>
-                                                )}
+                                                    ) : (
+                                                        <div className="flex flex-col items-end gap-2 text-right">
+                                                            <span className={`text-[9px] font-black uppercase px-2 py-1 ${m.player.playerStatus === 'INJURED' ? 'bg-red-600 text-white' :
+                                                                m.player.playerStatus === 'INACTIVE' ? 'bg-bg-secondary text-text-secondary' :
+                                                                    'bg-green-500 text-black'
+                                                                }`}>
+                                                                {m.player.playerStatus === 'INJURED' ? 'LESIONADO' :
+                                                                    m.player.playerStatus === 'INACTIVE' ? 'INACTIVO' :
+                                                                        m.player.playerStatus === 'RESTING' ? 'DESCANSO' : 'ACTIVO'}
+                                                            </span>
+                                                            {user?.id === m.player.id && (
+                                                                <button 
+                                                                    onClick={(e) => { e.stopPropagation(); handleRemovePlayer(m.player.id); }} 
+                                                                    className="text-[9px] font-black text-red-600 hover:underline uppercase tracking-tighter"
+                                                                >
+                                                                    Abandonar Equipo
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
                                             </div>
                                         </div>
                                     );
@@ -755,44 +770,101 @@ export default function TeamDetailPage() {
 
             <Modal
                 isOpen={activeModal === 'manageSignings'}
-                onClose={() => setActiveModal(null)}
+                onClose={() => { setActiveModal(null); setSearchQuery(''); setSearchResults([]); }}
                 title="Gestionar Fichajes Seguimiento"
             >
-                <div className="space-y-4">
-                    <div className="flex gap-2">
-                        <input
-                            id="new-signing"
-                            type="text"
-                            placeholder="Nombre del jugador..."
-                            className="flex-1 bg-bg-secondary border-2 border-black px-4 py-2 text-sm text-text-primary focus:outline-none focus:border-accent-primary"
-                        />
-                        <Button size="sm" onClick={async () => {
-                            const input = document.getElementById('new-signing') as HTMLInputElement;
-                            if (!input.value) return;
-                            const newList = [...(team.possibleSignings || []), input.value];
-                            try {
-                                await api.put(`/teams/${teamId}`, { possibleSignings: newList });
-                                fetchTeam();
-                                input.value = '';
-                            } catch (err) { showError('Error actualizando fichajes'); }
-                        }}>Añadir</Button>
+                <div className="space-y-6">
+                    <p className="text-[10px] text-text-secondary uppercase font-bold tracking-widest leading-relaxed">
+                        Buscá jugadores registrados para seguirlos o agregá nombres manualmente.
+                    </p>
+
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase text-text-secondary ml-1 tracking-widest">Buscar Jugador / Usuario</label>
+                        <div className="relative">
+                            <Input
+                                placeholder="Ecurre un nombre, DNI o correo..."
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                autoComplete="off"
+                            />
+                            {isSearching && <div className="absolute right-3 top-3"><Loader2 size={16} className="animate-spin text-accent-primary" /></div>}
+
+                            {searchQuery && !isSearching && searchResults.length > 0 && (
+                                <div className="absolute z-10 w-full mt-1 bg-bg-card border-2 border-black max-h-48 overflow-y-auto shadow-xl">
+                                    {searchResults.map(res => (
+                                        <div
+                                            key={res.id}
+                                            onClick={async () => {
+                                                const name = `${res.name} ${res.lastName}`;
+                                                if (!team.possibleSignings?.includes(name)) {
+                                                    const newList = [...(team.possibleSignings || []), name];
+                                                    try {
+                                                        await api.put(`/teams/${teamId}`, { possibleSignings: newList });
+                                                        await fetchTeam();
+                                                        success(`Se agregó a ${name} a la lista`);
+                                                        setSearchQuery('');
+                                                        setSearchResults([]);
+                                                    } catch (err) { showError('Error al agregar fichaje'); }
+                                                } else {
+                                                    showError('El jugador ya está en la lista');
+                                                }
+                                            }}
+                                            className="p-3 border-b border-border-subtle hover:bg-bg-secondary cursor-pointer flex justify-between items-center group"
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-sm block group-hover:text-accent-primary">{res.name} {res.lastName}</span>
+                                                <span className="text-[10px] text-text-secondary uppercase">{res.role} {res.city ? `| ${res.city}` : ''}</span>
+                                            </div>
+                                            <Plus size={16} className="text-accent-primary opacity-0 group-hover:opacity-100" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {searchQuery && !isSearching && searchResults.length === 0 && (
+                                <div className="absolute z-10 w-full mt-1 bg-bg-card border-2 border-black p-4 shadow-xl flex flex-col items-center gap-3">
+                                    <p className="text-xs text-text-secondary italic">No se encontró el usuario</p>
+                                    <button
+                                        onClick={async () => {
+                                            const newList = [...(team.possibleSignings || []), searchQuery];
+                                            try {
+                                                await api.put(`/teams/${teamId}`, { possibleSignings: newList });
+                                                await fetchTeam();
+                                                success(`Se agregó "${searchQuery}" manualmente`);
+                                                setSearchQuery('');
+                                            } catch (err) { showError('Error al agregar'); }
+                                        }}
+                                        className="w-full py-2 bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent-primary transition-all"
+                                    >
+                                        Agregar "{searchQuery}" manualmente
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-2 scrollbar-hide">
-                        {team.possibleSignings?.map((s, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 bg-bg-secondary border-2 border-border-subtle">
-                                <span className="text-sm text-text-primary font-bold uppercase">{s}</span>
-                                <button
-                                    onClick={async () => {
-                                        const newList = team.possibleSignings.filter((_, idx) => idx !== i);
-                                        await api.put(`/teams/${teamId}`, { possibleSignings: newList });
-                                        fetchTeam();
-                                    }}
-                                    className="text-red-600 hover:bg-red-600/10 p-1 transition-all"
-                                >
-                                    <Plus size={16} className="rotate-45" />
-                                </button>
-                            </div>
-                        ))}
+
+                    <div className="pt-6 border-t-2 border-border-subtle space-y-3">
+                        <label className="text-[10px] font-black uppercase text-text-secondary ml-1 tracking-widest">Lista Actual</label>
+                        <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                            {team.possibleSignings?.map((s, i) => (
+                                <div key={i} className="flex items-center justify-between p-3 bg-bg-secondary border-2 border-border-subtle group hover:border-black transition-all">
+                                    <span className="text-sm text-text-primary font-bold uppercase italic">{s}</span>
+                                    <button
+                                        onClick={async () => {
+                                            const newList = team.possibleSignings.filter((_, idx) => idx !== i);
+                                            await api.put(`/teams/${teamId}`, { possibleSignings: newList });
+                                            await fetchTeam();
+                                        }}
+                                        className="text-red-600 hover:bg-red-600/10 p-2 transition-all opacity-40 group-hover:opacity-100"
+                                    >
+                                        <Plus size={18} className="rotate-45" />
+                                    </button>
+                                </div>
+                            ))}
+                            {(!team.possibleSignings || team.possibleSignings.length === 0) && (
+                                <p className="text-center py-6 text-[9px] font-bold uppercase text-text-secondary opacity-30 italic">La lista está vacía</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </Modal>
