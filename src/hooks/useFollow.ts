@@ -5,7 +5,7 @@ import { useAlert } from '@/context/AlertContext';
 
 export function useFollow(userId: string) {
   const { isAuthenticated, user } = useAuth();
-  const { showError, success } = useAlert();
+  const { error, success } = useAlert();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,8 +37,8 @@ export function useFollow(userId: string) {
       const res = await api.post(`/users/${userId}/follow`);
       setIsFollowing(res.data.isFollowing);
       success(res.data.message);
-    } catch (error) {
-      showError('No se pudo actualizar el estado de seguimiento');
+    } catch (err) {
+      error('No se pudo actualizar el estado de seguimiento');
     } finally {
       setIsLoading(false);
     }

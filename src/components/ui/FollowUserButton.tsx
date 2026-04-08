@@ -16,10 +16,7 @@ export function FollowUserButton({ userId, size = 'md', className = '', variant 
   const { isAuthenticated, user } = useAuth();
   const { isFollowing, toggle, isLoading } = useFollow(userId);
 
-  console.log('[FollowUserButton] userId:', userId, 'isFollowing:', isFollowing, 'isLoading:', isLoading);
-
   if (!isAuthenticated || user?.id === userId) {
-    if (user?.id === userId) console.log('[FollowUserButton] Rendering null - same user');
     return null;
   }
 
