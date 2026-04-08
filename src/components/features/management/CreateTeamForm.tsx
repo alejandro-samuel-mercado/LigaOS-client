@@ -9,6 +9,8 @@ import { api } from '@/adapters/http';
 import { useAlert } from '@/context/AlertContext';
 import { useRef, useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useScope } from '@/context/ScopeContext';
 
 const teamSchema = z.object({
     name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -46,6 +48,8 @@ export function CreateTeamForm({ initialData, onSuccess, onCancel }: CreateTeamF
     const [states, setStates] = useState<any[]>([]);
     const [uploadingImage, setUploadingImage] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { user } = useAuth();
+    const scope = useScope();
 
     const {
         register,
@@ -56,9 +60,24 @@ export function CreateTeamForm({ initialData, onSuccess, onCancel }: CreateTeamF
     } = useForm<TeamFormValues>({
         resolver: zodResolver(teamSchema),
         defaultValues: initialData || {
-            country: 'Argentina',
+            country: scope.defaultCountry || 'Argentina',
+            state: !scope.shouldShowState() ? scope.defaultState : '',
+            city: !scope.shouldShowCity() ? scope.defaultCity : '',
         },
     });
+
+    useEffect(() => {
+        if (!scope.isLoaded) return;
+        if (!scope.shouldShowCountry() && !initialData) {
+            setValue('country', scope.defaultCountry);
+        }
+        if (!scope.shouldShowState() && !initialData) {
+            setValue('state', scope.defaultState);
+        }
+        if (!scope.shouldShowCity() && !initialData) {
+            setValue('city', scope.defaultCity);
+        }
+    }, [scope.isLoaded, scope.scopeLevel, scope.defaultCountry, scope.defaultState, scope.defaultCity, setValue, initialData]);
 
     useEffect(() => {
         async function fetchData() {
@@ -101,7 +120,34 @@ export function CreateTeamForm({ initialData, onSuccess, onCancel }: CreateTeamF
         }
     };
 
+    const [isSaving, setIsSaving] = useState(false);
+    const [settings, setSettings] = useState<any>(null);
+
+    useEffect(() => {
+        api.get('/settings').then(res => setSettings(res.data.data)).catch(console.error);
+    }, []);
+
     const onSubmit = async (data: TeamFormValues) => {
+        try {
+            if (!settings) {
+                // If settings takes too long to load, we shouldn't submit yet or risk bypassing the guard.
+                errorAlert('Cargando configuración, por favor espera un segundo.');
+                return;
+            }
+            const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
+            if (!initialData?.id && !isAdmin && settings?.isPaidMode && settings.priceCreateTeam > 0) {
+                const confirmed = window.confirm(`Crear este equipo consumirá ${settings.priceCreateTeam} monedas de tu cuenta. ¿Deseas continuar?`);
+                if (!confirmed) return;
+            }
+
+            await saveTeam(data);
+        } catch (err: any) {
+            errorAlert(err.response?.data?.message || 'Error al guardar el equipo');
+        }
+    };
+
+    const saveTeam = async (data: TeamFormValues) => {
+        setIsSaving(true);
         try {
             if (initialData?.id) {
                 await api.put(`/teams/${initialData.id}`, data);
@@ -109,10 +155,12 @@ export function CreateTeamForm({ initialData, onSuccess, onCancel }: CreateTeamF
                 await api.post('/teams', data);
             }
             onSuccess();
-        } catch (err: any) {
-            errorAlert(err.response?.data?.message || 'Error al guardar el equipo');
+        } finally {
+            setIsSaving(false);
         }
     };
+
+
 
     const currentLogo = watch('logo');
 
@@ -168,7 +216,7 @@ export function CreateTeamForm({ initialData, onSuccess, onCancel }: CreateTeamF
                 {...register('description')}
             />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {scope.shouldShowCity() && (
                 <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-black uppercase text-text-secondary tracking-widest px-1">Ciudad *</label>
                     <input
@@ -184,7 +232,9 @@ export function CreateTeamForm({ initialData, onSuccess, onCancel }: CreateTeamF
                     </datalist>
                     {errors.city && <span className="text-[10px] text-red-500 px-1">{errors.city.message}</span>}
                 </div>
+            )}
 
+            {scope.shouldShowState() && (
                 <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-black uppercase text-text-secondary tracking-widest px-1">Provincia *</label>
                     <input
@@ -200,7 +250,7 @@ export function CreateTeamForm({ initialData, onSuccess, onCancel }: CreateTeamF
                     </datalist>
                     {errors.state && <span className="text-[10px] text-red-500 px-1">{errors.state.message}</span>}
                 </div>
-            </div>
+            )}
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Input

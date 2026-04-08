@@ -8,6 +8,7 @@ import { Bell, Check, ChevronLeft, Calendar, Trophy, MessageCircle, Info } from 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { InvitationsList } from '@/components/features/notifications/InvitationsList';
 
 export default function NotificationsPage() {
     const router = useRouter();
@@ -92,6 +93,8 @@ export default function NotificationsPage() {
                         </button>
                     )}
                 </div>
+
+                <InvitationsList />
 
                 {loading ? (
                     <div className="text-center py-20 text-text-secondary">

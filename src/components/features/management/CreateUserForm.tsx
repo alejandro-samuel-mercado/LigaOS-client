@@ -6,9 +6,11 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { api } from '@/adapters/http';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Camera, User } from 'lucide-react';
 import { useAlert } from '@/context/AlertContext';
+import { useAuth } from '@/context/AuthContext';
+import { useScope } from '@/context/ScopeContext';
 
 const userSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -39,6 +41,8 @@ export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProp
   const [error, setError] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+  const scope = useScope();
   
   const {
     register,
@@ -50,9 +54,24 @@ export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProp
     resolver: zodResolver(userSchema),
     defaultValues: {
       role: role as any,
-      country: 'Argentina',
+      country: scope.defaultCountry || 'Argentina',
+      state: !scope.shouldShowState() ? scope.defaultState : '',
+      city: !scope.shouldShowCity() ? scope.defaultCity : '',
     },
   });
+
+  useEffect(() => {
+    if (!scope.isLoaded) return;
+    if (!scope.shouldShowCountry()) {
+      setValue('country', scope.defaultCountry);
+    }
+    if (!scope.shouldShowState()) {
+      setValue('state', scope.defaultState);
+    }
+    if (!scope.shouldShowCity()) {
+      setValue('city', scope.defaultCity);
+    }
+  }, [scope.isLoaded, scope.scopeLevel, scope.defaultCountry, scope.defaultState, scope.defaultCity, setValue]);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,8 +96,34 @@ export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProp
 
   const currentImage = watch('image');
 
-  const onSubmit = async (data: any) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    api.get('/settings').then(res => setSettings(res.data.data)).catch(console.error);
+  }, []);
+
+  const onSubmit = async (data: UserFormValues) => {
     setError(null);
+    try {
+      if (!settings) {
+          setError('Cargando configuración, por favor espera un segundo.');
+          return;
+      }
+      const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
+      if (!isAdmin && role === 'PLAYER' && settings?.isPaidMode && settings.priceRegisterPlayer > 0) {
+        const confirmed = window.confirm(`Inscribir este jugador consumirá ${settings.priceRegisterPlayer} monedas de tu cuenta. ¿Deseas continuar?`);
+        if (!confirmed) return;
+      }
+
+      await saveUser(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error al crear el usuario');
+    }
+  };
+
+  const saveUser = async (data: any) => {
+    setIsSaving(true);
     try {
       const payload = {
         ...data,
@@ -87,9 +132,13 @@ export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProp
       await api.post('/users', payload);
       onSuccess();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al crear el usuario');
+        setError(err.response?.data?.message || 'Error al crear el usuario');
+    } finally {
+        setIsSaving(false);
     }
   };
+
+
 
   const roleLabels: any = {
     PLAYER: 'Jugador',
@@ -196,18 +245,22 @@ export function CreateUserForm({ role, onSuccess, onCancel }: CreateUserFormProp
           error={errors.district?.message}
           {...register('district')}
         />
+        {scope.shouldShowCity() && (
         <Input
           label="Ciudad"
           placeholder="Ej: Capital"
           error={errors.city?.message}
           {...register('city')}
         />
+        )}
+        {scope.shouldShowState() && (
         <Input
           label="Provincia"
           placeholder="Ej: Buenos Aires"
           error={errors.state?.message}
           {...register('state')}
         />
+        )}
       </div>
 
       <div className="flex items-center gap-3 pt-4">

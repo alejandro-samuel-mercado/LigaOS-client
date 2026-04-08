@@ -82,7 +82,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     return (
         <AlertContext.Provider value={{ showAlert, success, error, info, warning }}>
             {children}
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none max-w-sm w-full">
+            <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none max-w-sm w-full">
                 <AnimatePresence>
                     {alerts.map((alert) => (
                         <motion.div
@@ -90,7 +90,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
                             initial={{ opacity: 0, x: 50, scale: 0.9 }}
                             animate={{ opacity: 1, x: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                            className={`flex items-start gap-4 p-4 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] pointer-events-auto backdrop-blur-md bg-black/90 ${getAlertStyles(
+                            className={`flex items-start gap-4 p-4 border-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] pointer-events-auto backdrop-blur-sm bg-white/90 ${getAlertStyles(
                                 alert.type
                             )}`}
                         >

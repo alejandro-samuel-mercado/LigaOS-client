@@ -3,6 +3,7 @@
 import { api } from '@/adapters/http';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { useScope } from './ScopeContext';
 
 interface LocationState {
     country: string | null;
@@ -19,14 +20,29 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
     const { user, isAuthenticated } = useAuth();
+    const scope = useScope();
     const [location, _setLocation] = useState<LocationState>({
         country: '',
         state: '',
     });
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Initial load from localStorage
     useEffect(() => {
+        if (!scope.isLoaded) return;
+
+        if (scope.scopeLevel !== 'GLOBAL') {
+            _setLocation({
+                country: scope.defaultCountry,
+                state: scope.defaultState,
+            });
+            localStorage.setItem('user_location', JSON.stringify({
+                country: scope.defaultCountry,
+                state: scope.defaultState,
+            }));
+            setIsLoaded(true);
+            return;
+        }
+
         const saved = localStorage.getItem('user_location');
         if (saved) {
             try {
@@ -36,27 +52,24 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             }
         }
         setIsLoaded(true);
-    }, []);
+    }, [scope.isLoaded, scope.scopeLevel, scope.defaultCountry, scope.defaultState]);
 
-    // Sync with Auth if user has location but localStorage is empty or different
     useEffect(() => {
-        if (isAuthenticated && user && isLoaded) {
+        if (isAuthenticated && user && isLoaded && scope.scopeLevel === 'GLOBAL') {
             if (user.state && user.country) {
                 const userLocation = { state: user.state, country: user.country };
-                // Only override if they are different to avoid loops
                 if (user.state !== location.state || user.country !== location.country) {
                     _setLocation(userLocation);
                     localStorage.setItem('user_location', JSON.stringify(userLocation));
                 }
             }
         }
-    }, [isAuthenticated, user, isLoaded, location.state, location.country]);
+    }, [isAuthenticated, user, isLoaded, location.state, location.country, scope.scopeLevel]);
 
     const setLocation = useCallback(async (newLocation: LocationState) => {
         _setLocation(newLocation);
         localStorage.setItem('user_location', JSON.stringify(newLocation));
         
-        // If logged in, save to profile
         if (isAuthenticated) {
             try {
                 await api.patch('/auth/me', {

@@ -3,6 +3,8 @@
 import { CreateTeamForm } from '@/components/features/management/CreateTeamForm';
 import { CreateTournamentForm } from '@/components/features/management/CreateTournamentForm';
 import { CreateUserForm } from '@/components/features/management/CreateUserForm';
+import { PaymentSettingsForm } from '@/components/features/management/PaymentSettingsForm';
+import { ScopeSettingsForm } from '@/components/features/management/ScopeSettingsForm';
 import { EntityManager } from '@/components/features/management/EntityManager';
 import { Modal } from '@/components/ui/Modal';
 import { useAlert } from '@/context/AlertContext';
@@ -10,23 +12,26 @@ import { useAuth } from '@/context/AuthContext';
 import { motion } from 'framer-motion';
 import {
     ChevronLeft,
-    Filter, Layers, List,
+    Filter, Globe, Layers, List,
     MapPin,
     Plus,
+    Settings,
     Shield,
     Trophy,
     UserPlus
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useScope } from '@/context/ScopeContext';
 
 export default function ManagementPage() {
     const { user, isLoading } = useAuth();
     const { success } = useAlert();
     const router = useRouter();
 
-    const [activeModal, setActiveModal] = useState<'team' | 'player' | 'referee' | 'tournament' | 'coach' | 'president' | 'group' | 'category' | 'division' | 'city' | 'state' | null>(null);
+    const [activeModal, setActiveModal] = useState<'team' | 'player' | 'referee' | 'tournament' | 'coach' | 'president' | 'group' | 'category' | 'division' | 'city' | 'state' | 'country' | 'payments' | 'scope' | null>(null);
 
+    const scope = useScope();
     const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
     const isPresident = user?.role === 'PRESIDENT';
 
@@ -106,15 +111,36 @@ export default function ManagementPage() {
             title: 'Gestionar Ciudades',
             description: 'Configurar ciudades disponibles',
             icon: MapPin,
-            show: isAdmin,
+            show: isAdmin && scope.shouldShowCity(),
             onClick: () => setActiveModal('city'),
         },
         {
             title: 'Gestionar Provincias',
             description: 'Configurar provincias o estados',
             icon: MapPin,
-            show: isAdmin,
+            show: isAdmin && scope.shouldShowState(),
             onClick: () => setActiveModal('state'),
+        },
+        {
+            title: 'Gestionar Países',
+            description: 'Configurar países disponibles',
+            icon: Globe,
+            show: isAdmin && scope.shouldShowCountry(),
+            onClick: () => setActiveModal('country'),
+        },
+        {
+            title: 'Configuración de Pagos',
+            description: 'Gestionar modo de pago y precios de acciones',
+            icon: Shield,
+            show: user?.role === 'SUPER_ADMIN',
+            onClick: () => setActiveModal('payments'),
+        },
+        {
+            title: 'Alcance del Sistema',
+            description: 'Configurar si la app es global, nacional, estatal o local',
+            icon: Settings,
+            show: user?.role === 'SUPER_ADMIN',
+            onClick: () => setActiveModal('scope'),
         },
     ];
 
@@ -311,6 +337,39 @@ export default function ManagementPage() {
                     endpoint="/states"
                     title="Provincias"
                     placeholder="Ej: Buenos Aires..."
+                />
+            </Modal>
+            <Modal
+                isOpen={activeModal === 'payments'}
+                onClose={() => setActiveModal(null)}
+                title="Configuración de Pagos"
+            >
+                <PaymentSettingsForm />
+            </Modal>
+
+            <Modal
+                isOpen={activeModal === 'scope'}
+                onClose={() => setActiveModal(null)}
+                title="Alcance del Sistema"
+            >
+                <ScopeSettingsForm
+                    onSuccess={() => {
+                        setActiveModal(null);
+                        success('Alcance del sistema actualizado');
+                    }}
+                    onCancel={() => setActiveModal(null)}
+                />
+            </Modal>
+
+            <Modal
+                isOpen={activeModal === 'country'}
+                onClose={() => setActiveModal(null)}
+                title="Gestionar Países"
+            >
+                <EntityManager
+                    endpoint="/countries"
+                    title="Países"
+                    placeholder="Ej: Argentina..."
                 />
             </Modal>
         </div>

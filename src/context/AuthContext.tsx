@@ -15,6 +15,11 @@ interface AuthUser {
   publicFields: string[];
   state?: string | null;
   country?: string | null;
+  coins: number;
+  social?: {
+    followers: number;
+    following: number;
+  };
 }
 
 interface AuthContextType {

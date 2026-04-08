@@ -178,11 +178,11 @@ export default function TeamDetailPage() {
     const handleAssignPlayer = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await api.post(`/teams/${teamId}/players`, {
-                playerId: selectedPlayerId,
-                number: playerNumber ? parseInt(playerNumber) : undefined,
-                position: playerPosition || undefined,
-                role: assignRole
+            await api.post(`/invitations`, {
+                teamId,
+                invitedUserId: selectedPlayerId,
+                teamRole: assignRole,
+                message: 'Me gustaría que te unas al equipo.'
             });
             setActiveModal(null);
             setSelectedPlayerId('');
@@ -193,9 +193,9 @@ export default function TeamDetailPage() {
             setPlayerPosition('');
             setIsCreatingPlayer(false);
             fetchTeam();
-            success('Miembro asignado correctamente');
+            success('Invitación enviada. El jugador debe aceptar para unirse.');
         } catch (err: any) {
-            showError(err.response?.data?.message || 'Error al asignar miembro');
+            showError(err.response?.data?.message || 'Error al enviar invitación');
         }
     };
 
@@ -308,7 +308,7 @@ export default function TeamDetailPage() {
                 )}
             </div>
 
-            <div className="main-container px-6 -mt-20 relative z-10">
+            <div className="main-container px-6 -mt-10 relative z-10">
                 <div className="flex items-end gap-6 mb-10">
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
@@ -479,26 +479,26 @@ export default function TeamDetailPage() {
                                                             <Plus size={18} className="rotate-45" />
                                                         </button>
                                                     </>
-                                                    ) : (
-                                                        <div className="flex flex-col items-end gap-2 text-right">
-                                                            <span className={`text-[9px] font-black uppercase px-2 py-1 ${m.player.playerStatus === 'INJURED' ? 'bg-red-600 text-white' :
-                                                                m.player.playerStatus === 'INACTIVE' ? 'bg-bg-secondary text-text-secondary' :
-                                                                    'bg-green-500 text-black'
-                                                                }`}>
-                                                                {m.player.playerStatus === 'INJURED' ? 'LESIONADO' :
-                                                                    m.player.playerStatus === 'INACTIVE' ? 'INACTIVO' :
-                                                                        m.player.playerStatus === 'RESTING' ? 'DESCANSO' : 'ACTIVO'}
-                                                            </span>
-                                                            {user?.id === m.player.id && (
-                                                                <button 
-                                                                    onClick={(e) => { e.stopPropagation(); handleRemovePlayer(m.player.id); }} 
-                                                                    className="text-[9px] font-black text-red-600 hover:underline uppercase tracking-tighter"
-                                                                >
-                                                                    Abandonar Equipo
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    )}
+                                                ) : (
+                                                    <div className="flex flex-col items-end gap-2 text-right">
+                                                        <span className={`text-[9px] font-black uppercase px-2 py-1 ${m.player.playerStatus === 'INJURED' ? 'bg-red-600 text-white' :
+                                                            m.player.playerStatus === 'INACTIVE' ? 'bg-bg-secondary text-text-secondary' :
+                                                                'bg-green-500 text-black'
+                                                            }`}>
+                                                            {m.player.playerStatus === 'INJURED' ? 'LESIONADO' :
+                                                                m.player.playerStatus === 'INACTIVE' ? 'INACTIVO' :
+                                                                    m.player.playerStatus === 'RESTING' ? 'DESCANSO' : 'ACTIVO'}
+                                                        </span>
+                                                        {user?.id === m.player.id && (
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleRemovePlayer(m.player.id); }}
+                                                                className="text-[9px] font-black text-red-600 hover:underline uppercase tracking-tighter"
+                                                            >
+                                                                Abandonar Equipo
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -653,7 +653,7 @@ export default function TeamDetailPage() {
             <Modal
                 isOpen={activeModal === 'assignPlayer'}
                 onClose={() => { setActiveModal(null); setIsCreatingPlayer(false); }}
-                title={isCreatingPlayer ? "Inscribir Nuevo Miembro" : "Añadir Miembro al Plantel"}
+                title={isCreatingPlayer ? "Inscribir Nuevo Miembro" : "Invitar Miembro al Plantel"}
             >
                 {isCreatingPlayer ? (
                     <CreateUserForm
@@ -722,11 +722,7 @@ export default function TeamDetailPage() {
                             </select>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input label={assignRole === 'PLAYER' ? "Número de Camiseta (Opcional)" : "Número (Opcional)"} type="number" value={playerNumber} onChange={(e) => setPlayerNumber(e.target.value)} />
-                            <Input label="Posición / Cargo" placeholder={assignRole === 'PLAYER' ? "Ej: Delantero" : "Ej: Ayudante"} value={playerPosition} onChange={(e) => setPlayerPosition(e.target.value)} />
-                        </div>
-                        <Button type="submit" disabled={!selectedPlayerId} className="w-full">Asignar al Equipo</Button>
+                        <Button type="submit" disabled={!selectedPlayerId} className="w-full">Enviar Invitación Oficial</Button>
 
                         <div className="pt-4 border-t-2 border-border-subtle mt-4">
                             <p className="text-[10px] text-text-secondary text-center uppercase font-bold mb-2">¿La persona no está registrada?</p>

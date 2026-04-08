@@ -8,6 +8,7 @@ import { api } from '@/adapters/http';
 import { useAuth } from '@/context/AuthContext';
 
 import { usePersistentData } from '@/hooks/usePersistentData';
+import { FollowUserButton } from '@/components/ui/FollowUserButton';
 
 interface PlayerDetail {
   id: string;
@@ -40,6 +41,10 @@ interface PlayerDetail {
     year: number;
     description: string | null;
   }>;
+  social: {
+    followers: number;
+    following: number;
+  };
 }
 
 export default function PlayerPublicProfilePage() {
@@ -123,7 +128,7 @@ export default function PlayerPublicProfilePage() {
           </div>
           <h1 className="text-4xl font-black text-text-primary uppercase tracking-tighter italic text-center leading-none">{player.name} {player.lastName}</h1>
           
-          <div className="flex gap-2 mt-4">
+          <div className="flex gap-2 mt-4 items-center">
             <span className="px-4 py-1.5 bg-black text-white text-[10px] font-black uppercase tracking-widest border-b-4 border-accent-primary">
               {player.role}
             </span>
@@ -131,10 +136,16 @@ export default function PlayerPublicProfilePage() {
               {getStatusLabel(player.playerStatus)}
             </span>
           </div>
+
+          <div className="mt-6 flex gap-3">
+            <FollowUserButton userId={player.id} size="md" />
+          </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-3 mb-10">
+        <div className="grid grid-cols-6 gap-3 mb-10">
+          <StatCard label="Seguidores" value={player.social?.followers || 0} />
+          <StatCard label="Siguiendo" value={player.social?.following || 0} />
           <StatCard label="PJ" value={player.stats.matchesPlayed} />
           <StatCard label="PG" value={player.stats.matchesWon} />
           <StatCard label="Goles" value={player.stats.goals} highlight />

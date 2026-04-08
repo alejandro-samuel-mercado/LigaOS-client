@@ -9,7 +9,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Shield, Award, UserCheck, ChevronRight, X, Zap, Clock } from 'lucide-react';
+import { Shield, Award, UserCheck, ChevronRight, X, Zap, Clock, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -78,6 +78,24 @@ function getStepsForRole(role: string, name: string): WizardStep[] {
           description: 'Cuando el partido está en juego, todos los usuarios ven el marcador actualizado al instante. El minuto se calcula automáticamente.',
           icon: <Zap size={36} className="text-accent-primary" />,
           action: { label: 'Ver Disponibilidad', href: '/profile' },
+        },
+      ];
+
+    case 'SUPER_ADMIN':
+    case 'ADMIN':
+      return [
+        bienvenida,
+        {
+          title: 'Configurá el Sistema',
+          description: 'Como administrador, primero configurá el alcance geográfico: Global, Nacional, Estatal o Local. Esto define qué datos se ven y gestionan en toda la plataforma.',
+          icon: <Settings size={36} className="text-accent-primary" />,
+          action: { label: 'Ir a Gestión', href: '/management' },
+        },
+        {
+          title: 'Gestioná Todo',
+          description: 'Podés crear torneos, equipos, usuarios, gestionar partidos y estadísticas. Todo el poder de la plataforma está en tus manos.',
+          icon: <Shield size={36} className="text-accent-primary" />,
+          action: { label: 'Panel de Gestión', href: '/management' },
         },
       ];
 

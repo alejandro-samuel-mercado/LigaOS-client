@@ -3,21 +3,23 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { AlertProvider } from '@/context/AlertContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { LocationProvider } from '@/context/LocationContext';
+import { ScopeProvider } from '@/context/ScopeContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+// import { Inter } from 'next/font/google';
 import { PushNotificationManager } from '@/components/features/notifications/PushNotificationManager';
 import { PageTransition } from '@/components/ui/PageTransition';
 import { ProductTour } from '@/components/features/onboarding/ProductTour';
+import Script from 'next/script';
 import './globals.css';
 
-const inter = Inter({
+/* const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
-});
+}); */
 
 export const metadata: Metadata = {
   title: {
@@ -51,11 +53,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={inter.variable}>
+    <html lang="es">
       <body className="antialiased">
+        <Script 
+          src="https://sdk.mercadopago.com/js/v2" 
+          strategy="beforeInteractive"
+        />
         <ThemeProvider>
           <AlertProvider>
             <AuthProvider>
+              <ScopeProvider>
               <LocationProvider>
                 <SocketProvider>
                   <NotificationProvider>
@@ -70,6 +77,7 @@ export default function RootLayout({
                   </NotificationProvider>
                 </SocketProvider>
               </LocationProvider>
+              </ScopeProvider>
             </AuthProvider>
           </AlertProvider>
         </ThemeProvider>

@@ -3,12 +3,14 @@
 import { americasLocations } from '@/constants/locations';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
+import { useScope } from '@/context/ScopeContext';
 import { ArrowRight, LogIn, MapPin, User } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export function OnboardingModal() {
   const { location, setLocation, isLoaded } = useLocation();
+  const { scopeLevel, isLoaded: isScopeLoaded } = useScope();
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -29,7 +31,7 @@ export function OnboardingModal() {
 
   // Don't render anything until contexts are loaded or if location is already set
   // Also hide on auth pages so users can login without the modal blocking them
-  if (!isLoaded || authLoading || location.state || isAuthPage) {
+  if (!isLoaded || !isScopeLoaded || authLoading || location.state || isAuthPage || user?.role === 'SUPER_ADMIN' || scopeLevel !== 'GLOBAL') {
     return null;
   }
 

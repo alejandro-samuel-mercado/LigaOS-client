@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { api } from '@/adapters/http';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { useScope } from '@/context/ScopeContext';
 
 const tournamentSchema = z.object({
     name: z.string().min(2, 'El nombre es requerido'),
@@ -33,10 +35,13 @@ export function CreateTournamentForm({ initialData, onSuccess, onCancel }: Creat
     const [divisions, setDivisions] = useState<any[]>([]);
     const [cities, setCities] = useState<string[]>([]);
     const [states, setStates] = useState<string[]>([]);
+    const { user } = useAuth();
+    const scope = useScope();
 
     const {
         register,
         handleSubmit,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<TournamentFormValues>({
         resolver: zodResolver(tournamentSchema),
@@ -69,8 +74,44 @@ export function CreateTournamentForm({ initialData, onSuccess, onCancel }: Creat
         fetchData();
     }, []);
 
+    useEffect(() => {
+        if (!scope.isLoaded || initialData) return;
+        if (!scope.shouldShowState()) {
+            setValue('state', scope.defaultState);
+        }
+        if (!scope.shouldShowCity()) {
+            setValue('city', scope.defaultCity);
+        }
+    }, [scope.isLoaded, scope.scopeLevel, scope.defaultState, scope.defaultCity, setValue, initialData]);
+
+    const [isSaving, setIsSaving] = useState(false);
+    const [settings, setSettings] = useState<any>(null);
+
+    useEffect(() => {
+        api.get('/settings').then(res => setSettings(res.data.data)).catch(console.error);
+    }, []);
+
     const onSubmit = async (data: TournamentFormValues) => {
         setError(null);
+        try {
+            if (!settings) {
+                setError('Cargando configuración, por favor espera un segundo.');
+                return;
+            }
+            const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
+            if (!initialData?.id && !isAdmin && settings?.isPaidMode && settings.priceCreateTournament > 0) {
+                const confirmed = window.confirm(`Crear este torneo consumirá ${settings.priceCreateTournament} monedas de tu cuenta. ¿Deseas continuar?`);
+                if (!confirmed) return;
+            }
+
+            await saveTournament(data);
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Error al guardar el torneo');
+        }
+    };
+
+    const saveTournament = async (data: TournamentFormValues) => {
+        setIsSaving(true);
         try {
             if (initialData?.id) {
                 await api.patch(`/tournaments/${initialData.id}`, data);
@@ -80,8 +121,12 @@ export function CreateTournamentForm({ initialData, onSuccess, onCancel }: Creat
             onSuccess();
         } catch (err: any) {
             setError(err.response?.data?.message || 'Error al guardar el torneo');
+        } finally {
+            setIsSaving(false);
         }
     };
+
+
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -114,7 +159,9 @@ export function CreateTournamentForm({ initialData, onSuccess, onCancel }: Creat
                 />
             </div>
 
+            {(scope.shouldShowCity() || scope.shouldShowState()) && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {scope.shouldShowCity() && (
                 <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-black uppercase text-text-secondary tracking-widest px-1">Ciudad</label>
                     <input
@@ -130,7 +177,9 @@ export function CreateTournamentForm({ initialData, onSuccess, onCancel }: Creat
                     </datalist>
                     {errors.city && <span className="text-[10px] text-red-500 px-1">{errors.city.message}</span>}
                 </div>
+                )}
 
+                {scope.shouldShowState() && (
                 <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-black uppercase text-text-secondary tracking-widest px-1">Provincia</label>
                     <input
@@ -146,7 +195,9 @@ export function CreateTournamentForm({ initialData, onSuccess, onCancel }: Creat
                     </datalist>
                     {errors.state && <span className="text-[10px] text-red-500 px-1">{errors.state.message}</span>}
                 </div>
+                )}
             </div>
+            )}
 
             <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-black uppercase text-text-secondary tracking-widest px-1">Tipo de Torneo *</label>
