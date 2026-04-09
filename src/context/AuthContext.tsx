@@ -45,18 +45,36 @@ interface RegisterData {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('user_data');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
+  });
   const [isLoading, setIsLoading] = useState(true);
+
+  // Helper to update user and localStorage simultaneously
+  const updateUserData = useCallback((userData: AuthUser | null) => {
+    setUser(userData);
+    if (typeof window !== 'undefined') {
+      if (userData) {
+        localStorage.setItem('user_data', JSON.stringify(userData));
+      } else {
+        localStorage.removeItem('user_data');
+      }
+    }
+  }, []);
 
   const checkAuth = useCallback(async () => {
     try {
       const { data } = await api.post('/auth/refresh');
       setAccessToken(data.data.accessToken);
       const { data: meData } = await api.get('/auth/me');
-      setUser(meData.data);
+      updateUserData(meData.data);
       Cookies.set('ligaos_session', 'true', { expires: 365 });
     } catch {
-      setUser(null);
+      updateUserData(null);
       setAccessToken(null);
       Cookies.remove('ligaos_session');
     } finally {
@@ -76,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       setAccessToken(data.data.accessToken);
-      setUser(data.data.user);
+      updateUserData(data.data.user);
       Cookies.set('ligaos_session', 'true', { expires: 365 });
     } finally {
       isAuthenticating.current = false;
@@ -100,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.post('/auth/logout');
     } finally {
-      setUser(null);
+      updateUserData(null);
       setAccessToken(null);
       Cookies.remove('ligaos_session');
     }

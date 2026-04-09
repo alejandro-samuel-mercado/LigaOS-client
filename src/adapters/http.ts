@@ -3,7 +3,8 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api';
 
-let accessToken: string | null = null;
+// In-memory token as primary, localStorage as fallback for reloads/navigation stability
+let accessToken: string | null = (typeof window !== 'undefined') ? localStorage.getItem('accessToken') : null;
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
@@ -68,9 +69,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         setAccessToken(null);
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
+        processQueue(refreshError, null);
+        setAccessToken(null);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -92,6 +92,13 @@ api.interceptors.response.use(
 
 export function setAccessToken(token: string | null): void {
   accessToken = token;
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem('accessToken', token);
+    } else {
+      localStorage.removeItem('accessToken');
+    }
+  }
 }
 
 export function getAccessToken(): string | null {
