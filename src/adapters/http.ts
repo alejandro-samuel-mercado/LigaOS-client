@@ -88,6 +88,23 @@ api.interceptors.response.use(
       }
     }
 
+    // Handle Offline Queue for mutations (POST, PATCH, PUT)
+    const isMutation = originalRequest && ['post', 'patch', 'put', 'delete'].includes(originalRequest.method?.toLowerCase() || '');
+    const isOfflineError = !error.response || error.code === 'ERR_NETWORK' || error.message === 'Network Error';
+
+    if (isOfflineError && isMutation && !isAuthRequest && !(originalRequest as any)._offline) {
+      const { offlineQueue } = await import('./offlineQueue');
+      offlineQueue.enqueue(
+        originalRequest.url || '',
+        originalRequest.method || 'post',
+        originalRequest.data ? JSON.parse(originalRequest.data) : null,
+        originalRequest.headers
+      );
+      
+      // Return a "resolved" fake response to avoid breaking the UI flow
+      return Promise.resolve({ data: { success: true, _offline: true } });
+    }
+
     const responseData = error.response?.data as { error?: { code?: string; message?: string } } | undefined;
     const errorCode = responseData?.error?.code ?? 'INTERNAL_ERROR';
     const errorMessage = getErrorMessage(errorCode);

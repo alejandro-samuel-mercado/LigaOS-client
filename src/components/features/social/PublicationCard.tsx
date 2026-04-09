@@ -60,6 +60,13 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
   };
 
   const handleLike = async () => {
+    // Optimistic Update
+    const previousIsLiked = isLiked;
+    const previousCount = likesCount;
+    
+    setIsLiked(!previousIsLiked);
+    setLikesCount(prev => !previousIsLiked ? prev + 1 : prev - 1);
+
     try {
       const headers: any = {};
       if (!user) {
@@ -67,10 +74,16 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
       }
       
       const res = await api.post(`/publications/${pub.id}/like`, {}, { headers });
-      setIsLiked(res.data.data.liked);
-      setLikesCount(prev => res.data.data.liked ? prev + 1 : prev - 1);
+      
+      // Si fue una respuesta real (no offline mock), sincronizamos el estado final por si acaso
+      if (!res.data._offline) {
+        setIsLiked(res.data.data.liked);
+      }
       if (onUpdate) onUpdate();
     } catch (err) {
+      // Revert if error wasn't queued (though interceptor should queue)
+      setIsLiked(previousIsLiked);
+      setLikesCount(previousCount);
       console.error(err);
     }
   };
@@ -106,17 +119,44 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
+
+    const commentContent = newComment;
+    setNewComment('');
+
+    // Optimistic Comment
+    const tempComment: any = {
+      id: `temp-${Date.now()}`,
+      content: commentContent,
+      createdAt: new Date().toISOString(),
+      author: user ? {
+        id: user.id,
+        name: user.name,
+        lastName: user.lastName,
+        image: user.image
+      } : null,
+      _isOptimistic: true // UI hint
+    };
+
+    setComments(prev => [...prev, tempComment]);
+
     try {
       const headers: any = {};
       if (!user) {
         headers['x-guest-id'] = getGuestId();
       }
 
-      const res = await api.post(`/publications/${pub.id}/comments`, { content: newComment }, { headers });
-      setComments(prev => [...prev, res.data.data]);
-      setNewComment('');
+      const res = await api.post(`/publications/${pub.id}/comments`, { content: commentContent }, { headers });
+      
+      // Replace optimistic comment with real one if not offline mock
+      if (!res.data._offline) {
+        setComments(prev => prev.map(c => c.id === tempComment.id ? res.data.data : c));
+      }
+      
       if (onUpdate) onUpdate();
     } catch (err) {
+      // Remove optimistic comment on fail
+      setComments(prev => prev.filter(c => c.id !== tempComment.id));
+      setNewComment(commentContent); // Restore text
       console.error(err);
     }
   };

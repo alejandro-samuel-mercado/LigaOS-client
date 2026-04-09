@@ -12,6 +12,7 @@ import type { Metadata, Viewport } from 'next';
 import { PushNotificationManager } from '@/components/features/notifications/PushNotificationManager';
 import { PageTransition } from '@/components/ui/PageTransition';
 import { ProductTour } from '@/components/features/onboarding/ProductTour';
+import { SyncManager } from '@/components/features/social/SyncManager';
 import Script from 'next/script';
 import './globals.css';
 
@@ -70,6 +71,7 @@ export default function RootLayout({
                     <PageTransition>
                       {children}
                     </PageTransition>
+                    <SyncManager />
                     <PushNotificationManager />
                     <OnboardingModal />
                     <ProductTour />

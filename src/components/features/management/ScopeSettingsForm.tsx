@@ -1,11 +1,10 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { api } from '@/adapters/http';
 import { useAlert } from '@/context/AlertContext';
 import { useScope } from '@/context/ScopeContext';
 import { Globe, Map, MapPin, Home } from 'lucide-react';
+import { Autocomplete } from '@/components/ui/Autocomplete';
 
 const SCOPE_OPTIONS = [
   { value: 'GLOBAL', label: 'Global', icon: Globe, desc: 'Se gestionan países, estados y ciudades. Todo visible.' },
@@ -22,9 +21,14 @@ interface ScopeSettingsFormProps {
 export function ScopeSettingsForm({ onSuccess, onCancel }: ScopeSettingsFormProps) {
   const { error: alertError, success: alertSuccess } = useAlert();
   const scope = useScope();
+  
   const [scopeLevel, setScopeLevel] = useState<string>('LOCAL');
   const [defaultCountry, setDefaultCountry] = useState('');
+  const [countryId, setCountryId] = useState('');
+  
   const [defaultState, setDefaultState] = useState('');
+  const [stateId, setStateId] = useState('');
+  
   const [defaultCity, setDefaultCity] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -40,7 +44,12 @@ export function ScopeSettingsForm({ onSuccess, onCancel }: ScopeSettingsFormProp
   const handleSave = async () => {
     setSaving(true);
     try {
-      await api.patch('/settings', { scopeLevel, defaultCountry, defaultState, defaultCity });
+      await api.patch('/settings', { 
+        scopeLevel, 
+        defaultCountry, 
+        defaultState, 
+        defaultCity 
+      });
       alertSuccess('Configuración de alcance guardada');
       await scope.reload();
       onSuccess();
@@ -49,6 +58,26 @@ export function ScopeSettingsForm({ onSuccess, onCancel }: ScopeSettingsFormProp
     } finally {
       setSaving(false);
     }
+  };
+
+  const searchCountries = async (query: string) => {
+    const res = await api.get('/countries');
+    const all = res.data.data;
+    return all.filter((c: any) => c.name.toLowerCase().includes(query.toLowerCase()));
+  };
+
+  const searchStates = async (query: string) => {
+    if (!countryId) return [];
+    const res = await api.get(`/states?countryId=${countryId}`);
+    const all = res.data.data;
+    return all.filter((s: any) => s.name.toLowerCase().includes(query.toLowerCase()));
+  };
+
+  const searchCities = async (query: string) => {
+    if (!stateId) return [];
+    const res = await api.get(`/cities?stateId=${stateId}`);
+    const all = res.data.data;
+    return all.filter((c: any) => c.name.toLowerCase().includes(query.toLowerCase()));
   };
 
   return (
@@ -80,41 +109,53 @@ export function ScopeSettingsForm({ onSuccess, onCancel }: ScopeSettingsFormProp
       <div className="space-y-3">
         <label className="text-[10px] font-black uppercase text-text-secondary tracking-widest px-1">Ubicación de Origen</label>
         <div className="space-y-2">
-          <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-text-secondary px-1">País</label>
-            <input
-              value={defaultCountry}
-              onChange={e => setDefaultCountry(e.target.value)}
-              className="w-full bg-bg-secondary border-2 border-black p-3 text-text-primary outline-none focus:border-accent-primary transition-colors text-sm"
-              placeholder="Ej: Argentina"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-text-secondary px-1">Provincia / Estado</label>
-            <input
-              value={defaultState}
-              onChange={e => setDefaultState(e.target.value)}
-              className="w-full bg-bg-secondary border-2 border-black p-3 text-text-primary outline-none focus:border-accent-primary transition-colors text-sm"
-              placeholder="Ej: Buenos Aires"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-text-secondary px-1">Ciudad</label>
-            <input
-              value={defaultCity}
-              onChange={e => setDefaultCity(e.target.value)}
-              className="w-full bg-bg-secondary border-2 border-black p-3 text-text-primary outline-none focus:border-accent-primary transition-colors text-sm"
-              placeholder="Ej: Capital Federal"
-            />
-          </div>
+          
+          <Autocomplete 
+            label="País"
+            value={defaultCountry}
+            placeholder="Selecciona país"
+            onSelect={(name, id) => {
+               setDefaultCountry(name);
+               setCountryId(id);
+               setDefaultState('');
+               setStateId('');
+               setDefaultCity('');
+            }}
+            onSearch={searchCountries}
+          />
+
+          <Autocomplete 
+            label="Provincia / Estado"
+            value={defaultState}
+            placeholder={countryId ? "Selecciona provincia" : "Primero selecciona un país"}
+            disabled={!countryId && !defaultState}
+            onSelect={(name, id) => {
+               setDefaultState(name);
+               setStateId(id);
+               setDefaultCity('');
+            }}
+            onSearch={searchStates}
+          />
+
+          <Autocomplete 
+            label="Ciudad"
+            value={defaultCity}
+            placeholder={stateId ? "Selecciona ciudad" : "Primero selecciona una provincia"}
+            disabled={!stateId && !defaultCity}
+            onSelect={(name, id) => {
+               setDefaultCity(name);
+            }}
+            onSearch={searchCities}
+          />
+
         </div>
       </div>
 
       <div className="flex items-center gap-3 pt-2">
-        <Button type="button" variant="ghost" onClick={onCancel} className="flex-1">
+        <Button type="button" variant="ghost" onClick={onCancel} className="flex-1 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none translate-y-[-4px] hover:translate-y-0 transition-all">
           Cancelar
         </Button>
-        <Button onClick={handleSave} isLoading={saving} className="flex-1">
+        <Button onClick={handleSave} isLoading={saving} className="flex-1 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none translate-y-[-4px] hover:translate-y-0 transition-all">
           Guardar
         </Button>
       </div>
