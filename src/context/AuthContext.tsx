@@ -70,6 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.post('/auth/refresh');
       setAccessToken(data.data.accessToken);
+      if (data.data.refreshToken) {
+        localStorage.setItem('refreshToken', data.data.refreshToken);
+      }
       const { data: meData } = await api.get('/auth/me');
       updateUserData(meData.data);
       Cookies.set('ligaos_session', 'true', { expires: 365 });
@@ -79,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (err.response?.status === 401 || err.response?.status === 403) {
         updateUserData(null);
         setAccessToken(null);
+        localStorage.removeItem('refreshToken');
         Cookies.remove('ligaos_session');
       }
     } finally {
@@ -98,6 +102,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       setAccessToken(data.data.accessToken);
+      if (data.data.refreshToken) {
+        localStorage.setItem('refreshToken', data.data.refreshToken);
+      }
       updateUserData(data.data.user);
       Cookies.set('ligaos_session', 'true', { expires: 365 });
     } finally {
@@ -111,6 +118,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.post('/auth/register', registerData);
       setAccessToken(data.data.accessToken);
+      if (data.data.refreshToken) {
+        localStorage.setItem('refreshToken', data.data.refreshToken);
+      }
       updateUserData(data.data.user);
       Cookies.set('ligaos_session', 'true', { expires: 365 });
     } finally {
@@ -124,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       updateUserData(null);
       setAccessToken(null);
+      localStorage.removeItem('refreshToken');
       Cookies.remove('ligaos_session');
     }
   }, []);

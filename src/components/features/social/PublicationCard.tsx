@@ -49,9 +49,24 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
 
+  const getGuestId = () => {
+    if (typeof window === 'undefined') return null;
+    let gid = localStorage.getItem('guest_id');
+    if (!gid) {
+      gid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('guest_id', gid);
+    }
+    return gid;
+  };
+
   const handleLike = async () => {
     try {
-      const res = await api.post(`/publications/${pub.id}/like`);
+      const headers: any = {};
+      if (!user) {
+        headers['x-guest-id'] = getGuestId();
+      }
+      
+      const res = await api.post(`/publications/${pub.id}/like`, {}, { headers });
       setIsLiked(res.data.data.liked);
       setLikesCount(prev => res.data.data.liked ? prev + 1 : prev - 1);
       if (onUpdate) onUpdate();
@@ -92,7 +107,12 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
     e.preventDefault();
     if (!newComment.trim()) return;
     try {
-      const res = await api.post(`/publications/${pub.id}/comments`, { content: newComment });
+      const headers: any = {};
+      if (!user) {
+        headers['x-guest-id'] = getGuestId();
+      }
+
+      const res = await api.post(`/publications/${pub.id}/comments`, { content: newComment }, { headers });
       setComments(prev => [...prev, res.data.data]);
       setNewComment('');
       if (onUpdate) onUpdate();
@@ -205,11 +225,17 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
                         )}
                       </Link>
                       <div className="flex-1 space-y-1">
-                        <Link href={`/players/${comment.author.id}`}>
-                          <p className="text-[10px] font-black text-accent-primary uppercase tracking-widest hover:underline italic">
-                            {comment.author.name} {comment.author.lastName}
+                        {comment.author ? (
+                          <Link href={`/players/${comment.author.id}`}>
+                            <p className="text-[10px] font-black text-accent-primary uppercase tracking-widest hover:underline italic">
+                              {comment.author.name} {comment.author.lastName}
+                            </p>
+                          </Link>
+                        ) : (
+                          <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest italic">
+                            Invitado
                           </p>
-                        </Link>
+                        )}
                         <p className="text-sm text-text-primary font-bold">{comment.content}</p>
                       </div>
                     </div>

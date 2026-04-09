@@ -60,17 +60,28 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await api.post('/auth/refresh');
-        const newToken = data.data.accessToken;
+        const storedRefreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+        
+        // Try refresh with cookies first, then with body if needed (or just body if common for PWA)
+        const refreshResponse = await api.post('/auth/refresh', { refreshToken: storedRefreshToken });
+        const newToken = refreshResponse.data.data.accessToken;
+        
         setAccessToken(newToken);
+        
+        // If the server returned a new refreshToken in the body, AuthContext will handle it
+        // but since this is http.ts, we can't easily call context. We'll hope AuthContext catches the next load.
+        // Actually, let's update it here too if it comes in data.data.refreshToken
+        if (refreshResponse.data.data.refreshToken && typeof window !== 'undefined') {
+          localStorage.setItem('refreshToken', refreshResponse.data.data.refreshToken);
+        }
+
         processQueue(null, newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        processQueue(refreshError, null);
         setAccessToken(null);
+        if (typeof window !== 'undefined') localStorage.removeItem('refreshToken');
         processQueue(refreshError, null);
-        setAccessToken(null);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
