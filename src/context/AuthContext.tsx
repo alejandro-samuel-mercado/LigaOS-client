@@ -68,7 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = useCallback(async () => {
     try {
-      const { data } = await api.post('/auth/refresh');
+      const storedToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+      const { data } = await api.post('/auth/refresh', { refreshToken: storedToken });
+      
       setAccessToken(data.data.accessToken);
       if (data.data.refreshToken) {
         localStorage.setItem('refreshToken', data.data.refreshToken);

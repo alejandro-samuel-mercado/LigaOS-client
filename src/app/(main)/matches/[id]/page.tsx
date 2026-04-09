@@ -98,7 +98,7 @@ export default function MatchDetailPage() {
     const { success, error: showError } = useAlert();
     const [showStreamModal, setShowStreamModal] = useState(false);
     const [streamUrl, setStreamUrl] = useState('');
-    
+
     // Comment state
     const [newComment, setNewComment] = useState('');
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -118,7 +118,7 @@ export default function MatchDetailPage() {
 
     // Setup real-time updates
     const { joinRoom, leaveRoom, subscribe } = useSocket();
-    
+
     useEffect(() => {
         if (matchId) {
             joinRoom(matchId);
@@ -268,13 +268,13 @@ export default function MatchDetailPage() {
     const getEmbedUrl = (url: string) => {
         if (!url) return null;
         const trimmedUrl = url.trim();
-        
+
         let videoId = '';
-        
+
         // 1. Standard YouTube patterns (watch?v=, embed/, v/, y2u.be/, etc)
         const ytRegex = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = trimmedUrl.match(ytRegex);
-        
+
         if (match && match[2].length === 11) {
             videoId = match[2];
         } else {
@@ -325,7 +325,7 @@ export default function MatchDetailPage() {
                     <ChevronLeft size={24} strokeWidth={3} />
                 </button>
 
-                <div className="relative z-10 flex flex-col items-center gap-6 px-6 py-12">
+                <div className="relative z-10 flex flex-col items-center gap-6 px-6 py-12 max-sm:pt-20">
                     <div className="flex flex-col items-center gap-1">
                         <span className="text-[10px] font-black uppercase text-accent-primary tracking-[0.3em]">{match.tournament.name}</span>
                         {match.groupName && (
@@ -343,7 +343,7 @@ export default function MatchDetailPage() {
                                     {match.hasPenalties && (
                                         <span className="text-xl font-black text-accent-primary italic">({match.homePenalties ?? 0})</span>
                                     )}
-                                    <span className="text-5xl font-black tabular-nums tracking-tighter italic">
+                                    <span className="text-5xl max-sm:text-3xl font-black tabular-nums tracking-tighter italic">
                                         {match.homeGoals} <span className="text-black/20 mx-1">:</span> {match.awayGoals}
                                     </span>
                                     {match.hasPenalties && (
@@ -357,16 +357,15 @@ export default function MatchDetailPage() {
                                     <span className="text-[10px] font-black uppercase text-white/40 tracking-[0.2em]">Tiempo Extra</span>
                                 )}
                             </div>
-                            
+
                             <div className="flex items-center gap-2">
-                                <span className={`px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${
-                                    match.status === 'LIVE' ? 'bg-red-600 text-white animate-pulse' :
+                                <span className={`px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg ${match.status === 'LIVE' ? 'bg-red-600 text-white animate-pulse' :
                                     match.status === 'FINISHED' ? 'bg-black text-white border border-white/20' :
-                                    match.status === 'POSTPONED' ? 'bg-accent-gold text-black' :
-                                    match.status === 'ANNULLED' ? 'bg-red-900 text-white' :
-                                    match.status === 'HALFTIME' ? 'bg-accent-gold text-black' :
-                                    'bg-white/10 text-white/60'
-                                }`}>
+                                        match.status === 'POSTPONED' ? 'bg-accent-gold text-black' :
+                                            match.status === 'ANNULLED' ? 'bg-red-900 text-white' :
+                                                match.status === 'HALFTIME' ? 'bg-accent-gold text-black' :
+                                                    'bg-white/10 text-white/60'
+                                    }`}>
                                     {match.status === 'LIVE' ? (
                                         <div className="flex flex-col items-center">
                                             <span className="text-[20px] font-black italic tabular-nums">{timerDisplay}</span>
@@ -392,8 +391,8 @@ export default function MatchDetailPage() {
                             </Link>
                         )}
                         {match.status !== 'FINISHED' && (
-                            <button 
-                                onClick={() => setShowStreamModal(true)} 
+                            <button
+                                onClick={() => setShowStreamModal(true)}
                                 className={`${hasActiveStream ? 'bg-black text-accent-primary border border-accent-primary' : 'bg-red-600 text-white'} px-6 py-3 font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]`}
                             >
                                 <Video size={16} />
@@ -404,7 +403,7 @@ export default function MatchDetailPage() {
 
                     {hasActiveStream && streamEmbedUrl && (
                         <div className="mt-8 w-full max-w-3xl aspect-video bg-black border-4 border-black shadow-2xl overflow-hidden relative group">
-                            <iframe 
+                            <iframe
                                 className="w-full h-full"
                                 src={streamEmbedUrl}
                                 title="Stream Player"
@@ -418,10 +417,10 @@ export default function MatchDetailPage() {
                     {hasActiveStream && !streamEmbedUrl && match.stream?.streamUrl && (
                         <div className="mt-8 p-6 bg-bg-secondary border-2 border-dashed border-accent-primary/30 text-center max-w-3xl w-full">
                             <p className="text-xs font-black uppercase text-accent-primary mb-2">Transmisión en curso</p>
-                            <a 
-                                href={match.stream.streamUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
+                            <a
+                                href={match.stream.streamUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 bg-accent-primary text-black px-4 py-2 text-[10px] font-black uppercase hover:bg-white transition-all shadow-lg"
                             >
                                 <Video size={14} /> Ver en Plataforma Externa
@@ -556,7 +555,7 @@ export default function MatchDetailPage() {
                 <div className="bg-bg-card border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                     <div className="p-8">
                         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-text-secondary opacity-60 mb-6">Minuto a Minuto</h2>
-                        
+
                         {match.events && match.events.length > 0 ? (
                             <div className="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-transparent before:via-border-subtle before:to-transparent mb-8">
                                 {match.events.map((event: any, i: number) => {
@@ -573,7 +572,7 @@ export default function MatchDetailPage() {
                                         HALFTIME_START: '⏸️',
                                         HALFTIME_END: '▶️'
                                     };
-                                    
+
                                     return (
                                         <div key={event.id || i} className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active`}>
                                             <div className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-black bg-bg-card shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 text-lg">
@@ -589,9 +588,9 @@ export default function MatchDetailPage() {
                                                             {isHome ? match.homeTeam.nameShort || match.homeTeam.name : match.awayTeam.nameShort || match.awayTeam.name}
                                                         </span>
                                                     ) : (
-                                                       <span className="text-[10px] font-black uppercase text-text-secondary bg-black/5 px-2 py-0.5">
-                                                           {event.player ? `${event.player.name} ${event.player.lastName}` : 'Invitado'}
-                                                       </span>
+                                                        <span className="text-[10px] font-black uppercase text-text-secondary bg-black/5 px-2 py-0.5">
+                                                            {event.player ? `${event.player.name} ${event.player.lastName}` : 'Invitado'}
+                                                        </span>
                                                     )}
                                                 </div>
                                                 <div className="text-sm font-black text-text-primary uppercase tracking-tight">
@@ -615,15 +614,15 @@ export default function MatchDetailPage() {
 
                         {/* Leave a comment section */}
                         <div className="bg-bg-secondary border-2 border-border-subtle p-4 flex gap-3">
-                            <Input 
-                                placeholder={user ? "Escribe un comentario..." : "Escribe un comentario (Invitado)..."} 
+                            <Input
+                                placeholder={user ? "Escribe un comentario..." : "Escribe un comentario (Invitado)..."}
                                 value={newComment}
                                 onChange={e => setNewComment(e.target.value)}
                                 className="flex-1"
                                 onKeyDown={e => e.key === 'Enter' && handlePostComment()}
                             />
-                            <Button 
-                                onClick={handlePostComment} 
+                            <Button
+                                onClick={handlePostComment}
                                 isLoading={isSubmittingComment}
                                 disabled={!newComment.trim()}
                                 className="uppercase font-black tracking-widest text-[10px]"
@@ -646,11 +645,11 @@ export default function MatchDetailPage() {
             <Modal isOpen={showStreamModal} onClose={() => setShowStreamModal(false)} title="Ser Transmisor en Vivo">
                 <form onSubmit={handleStartStream} className="space-y-4">
                     <p className="text-xs text-text-secondary">Pega el link de YouTube, Twitch o Facebook Live para ofrecer tu transmisión a todos los que sigan el partido.</p>
-                    <Input 
+                    <Input
                         required
-                        placeholder="https://..." 
-                        value={streamUrl} 
-                        onChange={e => setStreamUrl(e.target.value)} 
+                        placeholder="https://..."
+                        value={streamUrl}
+                        onChange={e => setStreamUrl(e.target.value)}
                     />
                     <Button type="submit" className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white border-2 border-black">
                         <Video size={18} /> Iniciar Transmisión
@@ -664,7 +663,7 @@ export default function MatchDetailPage() {
 function TeamHeaderDisplay({ team }: { team: any }) {
     return (
         <div className="flex flex-col items-center gap-4">
-            <div className="h-24 w-24 border-4 border-white/20 bg-white/5 shadow-2xl flex items-center justify-center overflow-hidden -rotate-3 hover:rotate-0 transition-transform duration-500">
+            <div className="h-24 w-24 max-sm:h-16 max-sm:w-16 border-4 border-white/20 bg-white/5 shadow-2xl flex items-center justify-center overflow-hidden -rotate-3 hover:rotate-0 transition-transform duration-500">
                 {team.logo ? (
                     <img src={team.logo} className="h-full w-full object-cover" />
                 ) : (

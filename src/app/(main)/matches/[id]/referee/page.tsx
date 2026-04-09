@@ -182,7 +182,7 @@ export default function RefereePanelPage() {
 
     // Setup real-time updates
     const { joinRoom, leaveRoom, subscribe } = useSocket();
-    
+
     useEffect(() => {
         if (matchId) {
             joinRoom(matchId);
@@ -292,7 +292,7 @@ export default function RefereePanelPage() {
     const canFinish = match.status === 'LIVE' && match.secondHalfStartTime && !isFinished;
 
     return (
-        <div className="min-h-screen bg-bg-primary text-text-primary p-4 md:p-8 font-inter relative overflow-hidden">
+        <div className="min-h-screen pb-40 bg-bg-primary text-text-primary p-0 font-inter relative overflow-hidden">
             {/* ALERT OVERLAY */}
             {isAlerting && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none">
@@ -310,15 +310,19 @@ export default function RefereePanelPage() {
                 <button onClick={() => router.back()} className="text-accent-primary hover:scale-110 transition-transform">
                     <ChevronLeft size={32} strokeWidth={3} />
                 </button>
-                <div className="text-center">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-primary animate-pulse">
-                        {MATCH_STATUS_LABELS[match.status]?.toUpperCase() || match.status}
-                    </p>
-                    <h1 className="text-2xl font-black italic uppercase tracking-tighter">Panel Árbitro</h1>
+                <div className='flex flex-col items-center'>
+                    <div className="text-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-primary animate-pulse">
+                            {MATCH_STATUS_LABELS[match.status]?.toUpperCase() || match.status}
+                        </p>
+                        <h1 className="text-2xl font-black italic uppercase tracking-tighter">Panel Árbitro</h1>
+                    </div>
+
+                    <span className="text-3xl font-black italic tabular-nums text-accent-primary ">{timerDisplay}</span>
                 </div>
-                <div className="flex flex-col items-end mr-10">
-                    <span className=" text-[9px] font-bold opacity-50 uppercase leading-none mb-1">Cronómetro</span>
-                    <span className="text-3xl font-black italic tabular-nums text-accent-primary">{timerDisplay}</span>
+
+                <div className="flex flex-col items-end mr-20">
+
                 </div>
             </div>
 

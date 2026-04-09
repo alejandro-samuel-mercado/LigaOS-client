@@ -62,21 +62,24 @@ export function ScopeSettingsForm({ onSuccess, onCancel }: ScopeSettingsFormProp
 
   const searchCountries = async (query: string) => {
     const res = await api.get('/countries');
-    const all = res.data.data;
+    const all = res.data.data || [];
+    if (!Array.isArray(all)) return [];
     return all.filter((c: any) => c.name.toLowerCase().includes(query.toLowerCase()));
   };
 
   const searchStates = async (query: string) => {
     if (!countryId) return [];
     const res = await api.get(`/states?countryId=${countryId}`);
-    const all = res.data.data;
+    const all = res.data.data || [];
+    if (!Array.isArray(all)) return [];
     return all.filter((s: any) => s.name.toLowerCase().includes(query.toLowerCase()));
   };
 
   const searchCities = async (query: string) => {
     if (!stateId) return [];
     const res = await api.get(`/cities?stateId=${stateId}`);
-    const all = res.data.data;
+    const all = res.data.data || [];
+    if (!Array.isArray(all)) return [];
     return all.filter((c: any) => c.name.toLowerCase().includes(query.toLowerCase()));
   };
 

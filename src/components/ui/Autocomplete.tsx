@@ -81,6 +81,7 @@ export function Autocomplete({ label, value, placeholder, onSelect, onSearch, di
           onChange={handleInputChange}
           onFocus={() => query.length > 0 && setIsOpen(true)}
           disabled={disabled}
+          autoComplete="off"
           className={`w-full bg-bg-secondary border-2 border-black p-3 pr-10 text-text-primary outline-none focus:border-accent-primary transition-colors text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           placeholder={placeholder}
         />
@@ -97,11 +98,11 @@ export function Autocomplete({ label, value, placeholder, onSelect, onSearch, di
         </div>
       </div>
 
-      {isOpen && (results.length > 0 || loading) && (
+      {isOpen && query.length > 0 && (
         <div className="absolute z-50 top-full left-0 w-full mt-1 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] max-h-48 overflow-y-auto">
-          {loading && results.length === 0 ? (
+          {loading ? (
             <div className="p-3 text-xs text-text-secondary italic">Buscando...</div>
-          ) : (
+          ) : results.length > 0 ? (
             results.map(item => (
               <button
                 key={item.id}
@@ -112,6 +113,8 @@ export function Autocomplete({ label, value, placeholder, onSelect, onSearch, di
                 {item.name}
               </button>
             ))
+          ) : (
+            <div className="p-3 text-xs text-red-500 font-bold uppercase">Sin resultados encontrados</div>
           )}
         </div>
       )}
