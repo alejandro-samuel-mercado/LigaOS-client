@@ -112,23 +112,23 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-bg-card border-2 border-black mb-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[12px_12px_0px_0px_var(--accent-primary)] transition-all group"
+      className="bg-bg-card border-2 border-black mb-10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:hover:shadow-[12px_12px_0px_0px_var(--accent-primary)] transition-all group"
     >
       {/* Header */}
-      <div className="p-6 flex items-center justify-between border-b-2 border-black/5 bg-gradient-to-r from-bg-secondary to-transparent">
-        <Link href={`/players/${pub.author.id}`} className="flex items-center gap-4 group/author">
-          <div className="h-14 w-14 border-2 border-black flex items-center justify-center overflow-hidden bg-black group-hover/author:-rotate-3 transition-transform">
+      <div className="p-4 sm:p-6 flex items-center justify-between border-b-2 border-black/5 bg-gradient-to-r from-bg-secondary to-transparent min-w-0">
+        <Link href={`/players/${pub.author.id}`} className="flex items-center gap-3 sm:gap-4 group/author min-w-0">
+          <div className="h-10 w-10 sm:h-14 sm:w-14 border-2 border-black flex items-center justify-center overflow-hidden bg-black group-hover/author:-rotate-3 transition-transform shrink-0">
             {pub.author.image ? (
               <img src={pub.author.image} alt={pub.author.name} className="h-full w-full object-cover grayscale hover:grayscale-0 transition-grayscale" />
             ) : (
-              <span className="text-white font-black text-xl italic">{pub.author.name[0]}</span>
+              <span className="text-white font-black text-lg italic">{pub.author.name[0]}</span>
             )}
           </div>
-          <div>
-            <p className="text-lg font-black text-text-primary leading-none uppercase italic group-hover/author:text-accent-primary transition-colors">
+          <div className="min-w-0">
+            <p className="text-sm sm:text-lg font-black text-text-primary leading-none uppercase italic group-hover/author:text-accent-primary transition-colors truncate">
               {pub.author.name} {pub.author.lastName}
             </p>
-            <p className="text-[10px] text-text-secondary uppercase font-black tracking-[0.2em] mt-1 opacity-50">{formatDate(pub.createdAt)}</p>
+            <p className="text-[9px] sm:text-[10px] text-text-secondary uppercase font-black tracking-[0.2em] mt-1 opacity-50 truncate">{formatDate(pub.createdAt)}</p>
           </div>
         </Link>
         {canDelete && (
@@ -143,13 +143,13 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
       </div>
 
       {/* Content */}
-      <div className="p-8">
-        <p className="text-lg text-text-primary whitespace-pre-wrap font-bold leading-relaxed">{pub.content}</p>
+      <div className="p-6 sm:p-8">
+        <p className="text-base sm:text-lg text-text-primary whitespace-pre-wrap font-bold leading-relaxed break-words">{pub.content}</p>
       </div>
 
       {/* Images */}
       {pub.images && pub.images.length > 0 && (
-        <div className="px-8 pb-8">
+        <div className="px-6 sm:px-8 pb-6 sm:pb-8">
           <div className={`grid gap-2 border-2 border-black ${pub.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
             {pub.images.map((img, idx) => (
               <img 
@@ -164,19 +164,19 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
       )}
 
       {/* Actions */}
-      <div className="px-8 py-5 border-t-2 border-black flex items-center gap-10 bg-black text-white">
+      <div className="px-6 sm:px-8 py-4 sm:py-5 border-t-2 border-black flex items-center gap-6 sm:gap-10 bg-black text-white overflow-x-auto no-scrollbar">
         <button 
           onClick={handleLike}
-          className={`flex items-center gap-3 text-xs font-black uppercase tracking-widest transition-all ${isLiked ? 'text-accent-secondary' : 'text-white/60 hover:text-white hover:scale-105'}`}
+          className={`flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all shrink-0 ${isLiked ? 'text-accent-secondary' : 'text-white/60 hover:text-white hover:scale-105'}`}
         >
-          <Heart size={22} fill={isLiked ? 'currentColor' : 'none'} strokeWidth={3} />
+          <Heart size={18} className="sm:w-[22px] sm:h-[22px]" fill={isLiked ? 'currentColor' : 'none'} strokeWidth={3} />
           <span>{likesCount} LIKES</span>
         </button>
         <button 
           onClick={fetchComments}
-          className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-white/60 hover:text-accent-primary hover:scale-105 transition-all"
+          className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs font-black uppercase tracking-widest text-white/60 hover:text-accent-primary hover:scale-105 transition-all shrink-0"
         >
-          <MessageCircle size={22} strokeWidth={3} />
+          <MessageCircle size={18} className="sm:w-[22px] sm:h-[22px]" strokeWidth={3} />
           <span>{pub.commentsCount} COMENTARIOS</span>
         </button>
       </div>
@@ -190,7 +190,7 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden bg-bg-secondary border-t-4 border-black"
           >
-            <div className="p-8 space-y-8">
+            <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
               {loadingComments ? (
                 <div className="py-10 text-center text-[10px] font-black uppercase tracking-widest animate-pulse italic">Cargando comentarios...</div>
               ) : (
@@ -223,15 +223,15 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
               )}
 
               {/* Add Comment Input */}
-              <form onSubmit={handleAddComment} className="flex gap-2">
+              <form onSubmit={handleAddComment} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="AGREGAR COMENTARIO..."
-                  className="flex-1 bg-bg-card border-2 border-black px-6 py-4 text-[10px] font-black uppercase text-text-primary focus:outline-none focus:ring-4 focus:ring-accent-primary/10 tracking-widest"
+                  placeholder="COMENTAR..."
+                  className="flex-1 bg-bg-card border-2 border-black px-4 py-3 sm:px-6 sm:py-4 text-[10px] font-black uppercase text-text-primary focus:outline-none focus:ring-4 focus:ring-accent-primary/10 tracking-widest"
                 />
-                <button type="submit" className="bg-black text-white px-8 font-black uppercase text-[10px] hover:bg-accent-primary transition-colors border-2 border-black active:translate-y-1">
+                <button type="submit" className="bg-black text-white px-6 py-3 sm:px-8 font-black uppercase text-[10px] hover:bg-accent-primary transition-colors border-2 border-black active:translate-y-1">
                   POST
                 </button>
               </form>

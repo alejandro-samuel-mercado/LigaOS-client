@@ -73,14 +73,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data: meData } = await api.get('/auth/me');
       updateUserData(meData.data);
       Cookies.set('ligaos_session', 'true', { expires: 365 });
-    } catch {
-      updateUserData(null);
-      setAccessToken(null);
-      Cookies.remove('ligaos_session');
+    } catch (err: any) {
+      // Only clear session if it's an explicit 401/403 error (token invalid/expired)
+      // If it's a network error (502, 503, connection refused), we keep the local state
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        updateUserData(null);
+        setAccessToken(null);
+        Cookies.remove('ligaos_session');
+      }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [updateUserData]);
 
   useEffect(() => {
     checkAuth();
@@ -107,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.post('/auth/register', registerData);
       setAccessToken(data.data.accessToken);
-      setUser(data.data.user);
+      updateUserData(data.data.user);
       Cookies.set('ligaos_session', 'true', { expires: 365 });
     } finally {
       isAuthenticating.current = false;

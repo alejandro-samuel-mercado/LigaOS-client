@@ -275,15 +275,15 @@ export default function TeamDetailPage() {
     );
 
     return (
-        <div className="min-h-screen pb-32 bg-bg-primary mesh-bg">
+        <div className="min-h-screen pb-32 bg-bg-primary mesh-bg overflow-x-hidden w-full">
             {/* Floating Action Button for Admins */}
             {canManage && (
                 <button
                     onClick={() => setActiveModal('editTeam')}
-                    className="fixed bottom-10 right-10 h-20 w-20 bg-accent-primary text-white rounded-full border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center z-[100] hover:scale-110 active:scale-95 transition-all group"
+                    className="fixed bottom-10 right-4 sm:right-10 h-16 w-16 sm:h-20 sm:w-20 bg-accent-primary text-white rounded-full border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center z-[100] hover:scale-110 active:scale-95 transition-all group"
                 >
-                    <Settings size={22} className="group-hover:rotate-90 transition-transform" />
-                    <span className="text-[12px] font-white uppercase tracking-tighter">Editar</span>
+                    <Settings size={20} className="group-hover:rotate-90 transition-transform" />
+                    <span className="text-[10px] sm:text-[12px] font-white uppercase tracking-tighter">Editar</span>
                 </button>
             )}
 
@@ -308,12 +308,12 @@ export default function TeamDetailPage() {
                 )}
             </div>
 
-            <div className="main-container px-6 -mt-10 relative z-10">
-                <div className="flex items-end gap-6 mb-10">
+            <div className="main-container px-4 sm:px-6 -mt-16 sm:-mt-24 relative z-10">
+                <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-8 mb-10 text-center sm:text-left">
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="h-36 w-36 shrink-0 bg-black border-8 border-bg-primary shadow-2xl flex items-center justify-center overflow-hidden -rotate-3 hover:rotate-0 transition-transform"
+                        className="sm:h-36 sm:w-36 max-sm:h-24 max-sm:w-24  shrink-0 bg-black border-8 border-bg-primary shadow-2xl flex items-center justify-center overflow-hidden -rotate-3 hover:rotate-0 transition-transform"
                     >
                         {team.logo ? (
                             <img src={team.logo} alt={team.name} className="h-full w-full object-cover" />
@@ -321,26 +321,22 @@ export default function TeamDetailPage() {
                             <Shield size={48} className="text-accent-primary" />
                         )}
                     </motion.div>
-                    <div className="pb-2">
-                        <h1 className="text-5xl font-black text-text-primary italic uppercase tracking-tighter leading-none">{team.name}</h1>
-                        <div className="flex items-center gap-4 mt-2">
+                    <div className="pb-2 w-full sm:w-auto min-w-0">
+                        <h1 className="text-3xl sm:text-5xl font-black text-text-primary italic uppercase tracking-tighter leading-tight sm:leading-none break-words">{team.name}</h1>
+                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-2">
                             <p className="text-xs font-black text-text-secondary uppercase tracking-widest flex items-center gap-1">
                                 <MapPin size={12} className="text-accent-primary" /> {team.city}, {team.state}
                             </p>
-                            <FavoriteButton teamId={teamId} />
-                            {canManage && (
-                                <button
-                                    onClick={() => setActiveModal('editTeam')}
-                                    className="xl:hidden px-3 py-1 bg-accent-primary text-black text-[9px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all border border-black transform -skew-x-12"
-                                >
-                                    Editar Equipo
-                                </button>
-                            )}
+                            <div className='flex items-center gap-3'>
+                                <FavoriteButton teamId={teamId} />
+
+
+                            </div>
                         </div>
                         {(team.category || team.division) && (
-                            <div className="flex gap-2 mt-2 text-[10px] font-black text-text-primary uppercase tracking-widest">
-                                {team.category && <span className="bg-bg-secondary px-2 py-1 border border-border-subtle">Cat: {team.category}</span>}
-                                {team.division && <span className="bg-bg-secondary px-2 py-1 border border-border-subtle">Div: {team.division}</span>}
+                            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-3 text-[10px] font-black text-text-primary uppercase tracking-widest">
+                                {team.category && <span className="bg-bg-secondary px-2 py-1 border border-border-subtle whitespace-nowrap">Cat: {team.category}</span>}
+                                {team.division && <span className="bg-bg-secondary px-2 py-1 border border-border-subtle whitespace-nowrap">Div: {team.division}</span>}
                             </div>
                         )}
                     </div>
@@ -350,35 +346,36 @@ export default function TeamDetailPage() {
                     <p className="text-sm text-text-secondary mb-8 max-w-2xl">{team.description}</p>
                 )}
 
-                {/* Roles/Staff */}
-                <div className="grid grid-cols-2 gap-4 mb-10">
-                    <div className="bg-bg-card border-2 border-black p-5">
+                {/* Roles/Staf                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+                    <div className="bg-bg-card border-2 border-black p-4 sm:p-5 flex flex-col justify-center min-w-0">
                         <span className="text-[10px] font-black uppercase text-accent-primary tracking-widest block mb-1">Presidente</span>
                         <p className="text-sm font-black text-text-primary uppercase truncate italic">
                             {team.president ? `${team.president.name} ${team.president.lastName}` : 'Sin asignar'}
                         </p>
                     </div>
-                    <div className="bg-bg-card border-2 border-black p-5 flex items-center justify-between">
-                        <div>
+                    <div className="bg-bg-card border-2 border-black p-4 sm:p-5 flex items-center justify-between gap-3 min-w-0">
+                        <div className="min-w-0 flex-1">
                             <span className="text-[10px] font-black uppercase text-accent-primary tracking-widest block mb-1">Director Técnico</span>
                             <p className="text-sm font-black text-text-primary uppercase truncate italic">
                                 {team.coach ? `${team.coach.name} ${team.coach.lastName}` : 'Sin asignar'}
                             </p>
                         </div>
                         {canManage && (
-                            <button onClick={() => setActiveModal('assignCoach')} className="p-2 hover:bg-bg-secondary text-text-secondary transition-all border border-border-subtle">
+                            <button onClick={() => setActiveModal('assignCoach')} className="p-2 shrink-0 hover:bg-bg-secondary text-text-secondary transition-all border border-border-subtle">
                                 <UserPlus size={16} />
                             </button>
                         )}
                     </div>
-                </div>                {/* Stadium & Contact */}
+                </div>
+
+                {/* Stadium & Contact */}
                 {(team.stadium || team.phone || team.email) && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
                         {team.stadium && (
                             <div className="bg-bg-card border-2 border-black p-5 flex items-center gap-4">
                                 <Building2 size={24} className="text-accent-primary shrink-0" />
                                 <div className="min-w-0 flex-1">
-                                    <span className="text-[10px] font-black uppercase text-text-secondary tracking-widest block mb-1">Estadio / Sede</span>
+                                    <span className="text-[10px] font-black uppercase text-text-secondary tracking-widest block mb-1 truncate">Estadio / Sede</span>
                                     <p className="text-sm font-black text-text-primary uppercase italic truncate">{team.stadium}</p>
                                 </div>
                             </div>
@@ -405,7 +402,7 @@ export default function TeamDetailPage() {
                 )}
 
                 {/* Tabs */}
-                <div className="flex gap-2 border-b-4 border-black pb-2 mb-8 overflow-x-auto no-scrollbar">
+                <div className="flex gap-2 border-b-4 border-black pb-2 mb-8 overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
                     {[
                         { id: 'roster', label: 'Plantel', icon: <User size={16} /> },
                         { id: 'matches', label: 'Partidos', icon: <Calendar size={16} /> },
@@ -444,14 +441,14 @@ export default function TeamDetailPage() {
                                     const staffMembers = currentPlayers.filter(m => m.teamRole !== 'PLAYER');
 
                                     const renderMember = (m: any) => (
-                                        <div key={m.id} className="group bg-bg-card border-2 border-black p-5 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-between">
-                                            <Link href={`/players/${m.player.id}`} className="flex items-center gap-4 flex-1">
+                                        <div key={m.id} className="group bg-bg-card border-2 border-black p-4 sm:p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-between gap-3 min-w-0">
+                                            <Link href={`/players/${m.player.id}`} className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                                                 <div className="h-14 w-14 bg-black border-2 border-black flex items-center justify-center overflow-hidden shrink-0">
                                                     {m.player?.image ? <img src={m.player.image} alt="" className="object-cover h-full w-full" /> : <User size={20} className="text-white/20" />}
                                                 </div>
-                                                <div>
-                                                    <p className="text-sm font-black text-text-primary uppercase group-hover:text-accent-primary transition-colors italic">{m.player?.name} {m.player?.lastName}</p>
-                                                    <div className="flex items-center gap-2">
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-black text-text-primary uppercase group-hover:text-accent-primary transition-colors italic truncate">{m.player?.name} {m.player?.lastName}</p>
+                                                    <div className="flex flex-wrap items-center gap-2">
                                                         <span className={`text-[10px] font-black px-2 py-0.5 uppercase ${m.teamRole !== 'PLAYER' ? 'bg-black text-accent-primary border border-accent-primary' : 'bg-accent-primary text-white'}`}>
                                                             {m.teamRole !== 'PLAYER' ? m.teamRole : (m.position || 'Gral')}
                                                         </span>
@@ -547,15 +544,17 @@ export default function TeamDetailPage() {
                                         const opponent = isHome ? m.awayTeam : m.homeTeam;
 
                                         return (
-                                            <Link href={`/matches/${m.id}`} key={m.id} className="bg-bg-card border-2 border-black p-5 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all flex items-center justify-between group">
-                                                <div className="flex-1">
-                                                    <span className="text-[9px] font-black text-accent-primary uppercase tracking-widest block mb-1">{m.tournament?.name} • {new Date(m.matchDate).toLocaleDateString()}</span>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className={`text-lg font-black uppercase italic ${isHome ? 'text-text-primary' : 'text-text-secondary'}`}>{team.nameShort || team.name}</span>
-                                                        <div className="bg-bg-secondary border-2 border-border-subtle px-3 py-1 text-sm font-black tabular-nums tracking-widest">
-                                                            {m.status === 'FINISHED' ? `${isHome ? m.homeGoals : m.awayGoals} - ${isHome ? m.awayGoals : m.homeGoals}` : 'VS'}
+                                            <Link href={`/matches/${m.id}`} key={m.id} className="bg-bg-card border-2 border-black p-4 sm:p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-between group gap-4 min-w-0">
+                                                <div className="flex-1 min-w-0">
+                                                    <span className="text-[9px] font-black text-accent-primary uppercase tracking-widest block mb-1 truncate">{m.tournament?.name} • {new Date(m.matchDate).toLocaleDateString()}</span>
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1">
+                                                        <span className={`text-base sm:text-lg font-black uppercase italic truncate ${isHome ? 'text-text-primary' : 'text-text-secondary'}`}>{team.nameShort || team.name}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="bg-bg-secondary border-2 border-border-subtle px-3 py-1 text-sm font-black tabular-nums tracking-widest">
+                                                                {m.status === 'FINISHED' ? `${isHome ? m.homeGoals : m.awayGoals} - ${isHome ? m.awayGoals : m.homeGoals}` : 'VS'}
+                                                            </div>
+                                                            <span className={`text-base sm:text-lg font-black uppercase italic truncate ${!isHome ? 'text-text-primary' : 'text-text-secondary'}`}>{opponent?.nameShort || opponent?.name || '???'}</span>
                                                         </div>
-                                                        <span className={`text-lg font-black uppercase italic ${!isHome ? 'text-text-primary' : 'text-text-secondary'}`}>{opponent?.nameShort || opponent?.name || '???'}</span>
                                                     </div>
                                                 </div>
                                                 <div className="flex h-10 w-10 items-center justify-center bg-black text-accent-primary group-hover:bg-accent-primary group-hover:text-white transition-all">
