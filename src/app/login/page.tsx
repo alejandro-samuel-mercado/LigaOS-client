@@ -5,11 +5,11 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Trophy } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Trophy, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { LABELS } from '@/content/labels';
 import { getErrorMessage } from '@/content/errors';
@@ -21,7 +21,7 @@ const loginSchema = z.object({
     password: z.string().min(6, 'Mínimo 6 caracteres'),
 });
 
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { login, checkAuth } = useAuth();
@@ -239,5 +239,17 @@ export default function LoginPage() {
                 </div>
             </motion.div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <Loader2 className="animate-spin text-accent-primary" size={48} />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }
