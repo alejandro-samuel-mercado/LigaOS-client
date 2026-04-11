@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { api } from '@/adapters/http';
-import { LABELS } from '@/content/labels';
-import { MATCH_STATUS_LABELS, MATCH_STATUS_COLORS } from '@/content/match';
-import { CalendarDays, MapPin, Shield, Clock } from 'lucide-react';
+import { MATCH_STATUS_COLORS, MATCH_STATUS_LABELS } from '@/content/match';
 import { motion } from 'framer-motion';
+import { CalendarDays, Clock, MapPin, Shield } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function RefereeDashboard() {
   const router = useRouter();
@@ -19,7 +18,6 @@ export default function RefereeDashboard() {
         const { data } = await api.get('/matches/referee/me');
         setMatches(data.data);
       } catch (err) {
-        console.error('Error fetching referee matches', err);
       } finally {
         setLoading(false);
       }

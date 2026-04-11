@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, X } from 'lucide-react';
+import { Loader2, Search, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Item {
   id: string;
@@ -54,7 +54,6 @@ export function Autocomplete({ label, value, placeholder, onSelect, onSearch, di
       const items = await onSearch(val);
       setResults(items);
     } catch (error) {
-      console.error('Search error:', error);
     } finally {
       setLoading(false);
     }

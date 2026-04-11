@@ -1,16 +1,16 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { api } from '@/adapters/http';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { api } from '@/adapters/http';
 import { useAlert } from '@/context/AlertContext';
-import { useRef, useState, useEffect } from 'react';
-import { Camera } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useScope } from '@/context/ScopeContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Camera } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const teamSchema = z.object({
     name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -93,7 +93,7 @@ export function CreateTeamForm({ initialData, onSuccess, onCancel }: CreateTeamF
                 setCities(cityRes.data.data);
                 setStates(stateRes.data.data);
             } catch (err) {
-                console.error('Error fetching categories/divisions:', err);
+               
             }
         }
         fetchData();

@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ChevronLeft, Users, Shield, Loader2 } from 'lucide-react';
 import { api } from '@/adapters/http';
 import { useAuth } from '@/context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, Loader2, Shield, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function SocialNetworkPage() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function SocialNetworkPage() {
       setLoading(true);
       try {
         const [teamsRes, followingRes, followersRes] = await Promise.all([
-          api.get('/favorites'),
+          api.get('/favorites/teams'),
           api.get(`/users/${user.id}/following`),
           api.get(`/users/${user.id}/followers`)
         ]);
@@ -38,7 +38,6 @@ export default function SocialNetworkPage() {
         setFollowingUsers(followingRes.data.data);
         setFollowers(followersRes.data.data);
       } catch (err) {
-        console.error('Error fetching social data', err);
       } finally {
         setLoading(false);
       }

@@ -1,20 +1,20 @@
 'use client';
 
 import { api } from '@/adapters/http';
-import { MATCH_STATUS_LABELS } from '@/content/match';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
+import { MATCH_STATUS_LABELS } from '@/content/match';
 import { useAlert } from '@/context/AlertContext';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import {
-    AlertCircle,
-    ChevronLeft,
-    Pause,
-    Play,
-    Square,
-    Timer
+      AlertCircle,
+      ChevronLeft,
+      Pause,
+      Play,
+      Square,
+      Timer
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -62,7 +62,7 @@ export default function RefereePanelPage() {
             const { data } = await api.get(`/matches/${matchId}`);
             setMatch(data.data);
         } catch (err) {
-            console.error(err);
+           
         } finally {
             setLoading(false);
         }

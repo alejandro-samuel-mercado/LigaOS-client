@@ -126,9 +126,7 @@ export default function TournamentDetailPage() {
         groupName: m.groupName || teamsInfo[m.homeTeam?.id]?.groupName,
         stadium: m.stadium || m.homeTeam?.stadium || teamsInfo[m.homeTeam?.id]?.stadium || 'Sede a definir'
     })) || [];
-    console.log(processedMatches)
-
-
+  
     const handleCreateMatch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (homeTeamId === awayTeamId) return showError('El equipo local y visitante no pueden ser el mismo');

@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Trophy, ChevronLeft, Award, Medal, Shield } from 'lucide-react';
 import { api } from '@/adapters/http';
-import { motion } from 'framer-motion';
 import { useLocation } from '@/context/LocationContext';
+import { motion } from 'framer-motion';
+import { Award, ChevronLeft, Medal, Shield, Trophy } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function WinnersPage() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function WinnersPage() {
         const res = await api.get(`/tournaments/winners/stats${stateQuery}`);
         setData(res.data.data);
       } catch (err) {
-        console.error(err);
+      
       } finally {
         setLoading(false);
       }

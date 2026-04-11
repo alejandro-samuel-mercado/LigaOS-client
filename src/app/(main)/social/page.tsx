@@ -1,6 +1,5 @@
 'use client';
 
-import { Suspense } from 'react';
 import { api } from '@/adapters/http';
 import { PublicationCard } from '@/components/features/social/PublicationCard';
 import { LABELS } from '@/content/labels';
@@ -10,19 +9,19 @@ import { useLocation } from '@/context/LocationContext';
 import { usePersistentData } from '@/hooks/usePersistentData';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-    ChevronDown,
-    ChevronRight,
-    Filter,
-    MapPin,
-    MessageSquare,
-    Search,
-    Shield,
-    Trophy,
-    Users
+      ChevronDown,
+      ChevronRight,
+      Filter,
+      MapPin,
+      MessageSquare,
+      Search,
+      Shield,
+      Trophy,
+      Users
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 interface SearchResults {
     publications?: Array<any>;
@@ -122,7 +121,7 @@ function SocialContent() {
                 setPagination(cachedPagination);
                 setType(cachedType);
             } catch (e) {
-                console.error('Error loading social cache', e);
+              
             }
         }
     }, []);
@@ -180,7 +179,7 @@ function SocialContent() {
             }
             setPagination(prev => ({ ...prev, ...newPagination }));
         } catch (e) {
-            console.error('Search error', e);
+           
         } finally {
             setLoading(false);
             setLoadingMore(false);

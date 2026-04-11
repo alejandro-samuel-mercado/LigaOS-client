@@ -1,14 +1,14 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { api } from '@/adapters/http';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { api } from '@/adapters/http';
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useScope } from '@/context/ScopeContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const tournamentSchema = z.object({
     name: z.string().min(2, 'El nombre es requerido'),
@@ -68,7 +68,7 @@ export function CreateTournamentForm({ initialData, onSuccess, onCancel }: Creat
                 setCities(cityRes.data.data.map((c: any) => c.name));
                 setStates(stateRes.data.data.map((s: any) => s.name));
             } catch (err) {
-                console.error('Error fetching categories/divisions:', err);
+              
             }
         }
         fetchData();

@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { useAlert } from '@/context/AlertContext';
 import { api } from '@/adapters/http';
-import { Shield, ChevronLeft, Save, MapPin, Info, Phone, Mail, Instagram, Facebook, Layers, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { useAlert } from '@/context/AlertContext';
+import { useAuth } from '@/context/AuthContext';
+import { Camera, ChevronLeft, Facebook, Info, Instagram, Layers, MapPin, Phone, Save, Shield } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 export default function TeamEditPage() {
   const params = useParams();
@@ -83,7 +83,7 @@ export default function TeamEditPage() {
           facebook: t.facebook || '',
         });
       } catch (err) {
-        console.error(err);
+        
       } finally {
         setLoading(false);
       }

@@ -63,8 +63,6 @@ export default function MatchesPage() {
         m.tournament.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    console.log("ll: " + filteredMatches)
-
     return (
         <div className="min-h-screen pb-32 bg-bg-primary mesh-bg">
             <div className="relative h-48 bg-black border-b-8 border-accent-primary overflow-hidden">

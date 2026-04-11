@@ -1,24 +1,24 @@
 'use client';
 
 import { api } from '@/adapters/http';
-import { MATCH_EVENT_LABELS, MATCH_STATUS_LABELS } from '@/content/match';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
+import { MATCH_EVENT_LABELS, MATCH_STATUS_LABELS } from '@/content/match';
 import { useAuth } from '@/context/AuthContext';
 import {
-    AlertCircle,
-    Calendar,
-    Check,
-    ChevronLeft,
-    Clock,
-    Edit2,
-    MapPin,
-    Shield,
-    Users,
-    Video,
-    X
+      AlertCircle,
+      Calendar,
+      Check,
+      ChevronLeft,
+      Clock,
+      Edit2,
+      MapPin,
+      Shield,
+      Users,
+      Video,
+      X
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -214,7 +214,7 @@ export default function MatchDetailPage() {
                     await api.post(`/matches/${matchId}/referee/random`);
                     await fetchMatch();
                 } catch (err: any) {
-                    console.log(err);
+                   
                     triggerConfirm('Error', err.details.message || 'Error al asignar árbitro', () => { });
                 }
             }

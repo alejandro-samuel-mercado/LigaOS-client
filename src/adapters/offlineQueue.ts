@@ -1,4 +1,3 @@
-import axios from 'axios';
 
 export interface QueuedRequest {
   id: string;
@@ -49,7 +48,6 @@ class OfflineQueueService {
     // Prevent duplicates for identical likes if needed, but simple queue for now
     this.queue.push(request);
     this.saveQueue();
-    console.log('Request enqueued for offline sync:', url);
   }
 
   async sync(apiInstance: any) {
@@ -57,7 +55,7 @@ class OfflineQueueService {
     if (!navigator.onLine) return;
 
     this.isSyncing = true;
-    console.log(`Starting sync of ${this.queue.length} requests...`);
+   
 
     const itemsToProcess = [...this.queue];
     
@@ -77,15 +75,12 @@ class OfflineQueueService {
         this.queue = this.queue.filter(q => q.id !== item.id);
         this.saveQueue();
       } catch (error) {
-        console.error('Failed to sync offline request:', item.url, error);
-        // If it's a 4xx error, it might be invalid, should we remove it?
-        // If it's still a network error, stop syncing and retry later
+     
         if (!navigator.onLine) break;
       }
     }
 
     this.isSyncing = false;
-    console.log('Sync process finished.');
   }
 
   getQueueLength() {

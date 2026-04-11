@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
 import { api } from '@/adapters/http';
+import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 import { Calendar, Clock, MapPin, Shield } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Props {
   isOpen: boolean;
@@ -39,7 +39,6 @@ export function EditMatchModal({ isOpen, onClose, match, onUpdate }: Props) {
         const { data } = await api.get('/users?role=REFEREE');
         setReferees(data.data || []);
       } catch (err) {
-        console.error(err);
       }
     };
     if (isOpen) fetchReferees();

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { api } from '@/adapters/http';
-import { useAlert } from '@/context/AlertContext';
 import { Button } from '@/components/ui/Button';
-import { Trash2, Plus, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useAlert } from '@/context/AlertContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface Entity {
   id: string;
@@ -32,7 +32,6 @@ export function EntityManager({ endpoint, title, placeholder = "Nuevo elemento..
       const { data } = await api.get(endpoint);
       setItems(data.data);
     } catch (error) {
-      console.error('Error fetching items:', error);
     } finally {
       setLoading(false);
     }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
-import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import axios from 'axios';
+import { useCallback, useEffect } from 'react';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
@@ -52,7 +52,7 @@ export const PushNotificationManager = () => {
         withCredentials: true,
       });
 
-      console.log('User is subscribed to Web Push');
+      
     } catch (err) {
       console.error('Failed to subscribe the user: ', err);
     }
@@ -68,7 +68,7 @@ export const PushNotificationManager = () => {
         const registration = await navigator.serviceWorker.register('/push-sw.js');
         console.log('Service Worker registered');
 
-        // Check if already subscribed
+        
         const existingSubscription = await registration.pushManager.getSubscription();
         if (!existingSubscription) {
           // Request permission

@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { api } from '@/adapters/http';
 import { useAlert } from '@/context/AlertContext';
-import { Check, X, Mail } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Check, Mail, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export function InvitationsList() {
     const { success, error: showError } = useAlert();
@@ -16,7 +16,6 @@ export function InvitationsList() {
             const { data } = await api.get('/invitations/received?status=PENDING');
             setInvitations(data.data || []);
         } catch (error) {
-            console.error(error);
         } finally {
             setLoading(false);
         }

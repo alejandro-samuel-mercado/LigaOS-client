@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Heart, MessageCircle, Trash2, Plus } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/context/AuthContext';
 import { api } from '@/adapters/http';
-import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Heart, MessageCircle, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
 
 interface Comment {
   id: string;
@@ -84,7 +83,6 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
       // Revert if error wasn't queued (though interceptor should queue)
       setIsLiked(previousIsLiked);
       setLikesCount(previousCount);
-      console.error(err);
     }
   };
 
@@ -95,7 +93,6 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
       if (onDelete) onDelete();
       if (onUpdate) onUpdate();
     } catch (err) {
-      console.error(err);
     }
   };
 
@@ -110,7 +107,6 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
       const res = await api.get(`/publications/${pub.id}/comments`);
       setComments(res.data.data);
     } catch (err) {
-      console.error(err);
     } finally {
       setLoadingComments(false);
     }
@@ -156,9 +152,7 @@ export function PublicationCard({ publication: pub, onDelete, onUpdate }: Public
     } catch (err) {
       // Remove optimistic comment on fail
       setComments(prev => prev.filter(c => c.id !== tempComment.id));
-      setNewComment(commentContent); // Restore text
-      console.error(err);
-    }
+      setNewComment(commentContent);     }
   };
 
   const formatDate = (dateStr: string) => {
